@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14213D">
+<title>Работно време</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ECEFF3;--surface:#FFFFFF;--surface-2:#F5F7FA;--ink:#14213D;--muted:#5E6B80;--line:#DDE3EA;
+  --work:#0E8A5F;--work-bg:#E2F3EB;--pause:#B26F12;--pause-bg:#FBEFD9;--drive:#46679A;--drive-bg:#E5ECF6;
+  --shift:#3346C2;--shift-bg:#E7EAFB;--danger:#BE3A2A;--danger-bg:#FBE5E1;--focus:#3346C2;
+  --radius-l:18px;--radius-m:12px;--radius-s:8px;
+  color-scheme:light;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0E1522;--surface:#162030;--surface-2:#1C283A;--ink:#E8EDF4;--muted:#97A5BA;--line:#2A3850;
+    --work:#3CC48F;--work-bg:#163A2E;--pause:#E8A94A;--pause-bg:#3D2E17;--drive:#86A6D6;--drive-bg:#1D2D46;
+    --shift:#8E9CF2;--shift-bg:#232B55;--danger:#F0806F;--danger-bg:#46221E;--focus:#8E9CF2;
+    color-scheme:dark;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+main{max-width:1080px;margin:0 auto;padding:18px 16px 40px}
+.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.i.sm{width:16px;height:16px}
+.i.lg{width:26px;height:26px}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* Header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.mark{width:44px;height:44px;border-radius:13px;background:var(--ink);color:var(--bg);display:grid;place-items:center;flex:none}
+.brand h1{font-size:21px;font-weight:700;margin:0;letter-spacing:-.01em}
+.brand p{margin:0;color:var(--muted);font-size:13px}
+.now{text-align:right;line-height:1.2}
+.now .t{font-size:22px;font-weight:600}
+.now .d{font-size:13px;color:var(--muted)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-l);padding:20px;margin-bottom:14px}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.card-head h2{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:600;margin:0}
+.card-head h2 .i{color:var(--muted)}
+.grid-2{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;align-items:start}
+.grid-2>.card{margin-bottom:0}
+.stack{display:grid;gap:14px;margin-bottom:14px}
+
+/* Hero */
+.hero{--c:var(--muted);--cbg:var(--surface-2);position:relative;overflow:hidden}
+.hero[data-state="drive"]{--c:var(--drive);--cbg:var(--drive-bg)}
+.hero[data-state="work"]{--c:var(--work);--cbg:var(--work-bg)}
+.hero[data-state="pause"]{--c:var(--pause);--cbg:var(--pause-bg)}
+.hero::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--c)}
+.state{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.state-ic{width:52px;height:52px;border-radius:15px;background:var(--cbg);color:var(--c);display:grid;place-items:center;flex:none;transition:background .3s,color .3s}
+.state-txt{min-width:0}
+.state-title{font-size:18px;font-weight:600;margin:0}
+.state-sub{color:var(--muted);font-size:14px;margin:0;overflow-wrap:anywhere}
+.timer{margin-left:auto;text-align:right}
+.timer b{display:block;font-size:clamp(30px,7vw,46px);font-weight:600;line-height:1;letter-spacing:-.02em;color:var(--c)}
+.timer small{color:var(--muted);font-size:12px}
+.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px;vertical-align:middle}
+.hero[data-state="work"] .pulse,.hero[data-state="pause"] .pulse,.hero[data-state="drive"] .pulse{animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+label.lbl{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.input-ic{position:relative}
+.input-ic .i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+input[type=text],input[type=datetime-local],select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface);min-height:44px}
+.input-ic input{padding-left:40px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 0}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 11px 5px 8px;font-size:13px;cursor:pointer;max-width:100%}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip:hover{border-color:var(--muted)}
+.chip.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px}
+.tile{--c:var(--shift);--cbg:var(--shift-bg);display:flex;align-items:center;gap:11px;text-align:left;padding:12px;border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface);cursor:pointer;min-height:64px;transition:border-color .15s,transform .1s}
+.tile:hover:not(:disabled){border-color:var(--c)}
+.tile:active:not(:disabled){transform:scale(.98)}
+.tile .ic{width:40px;height:40px;border-radius:11px;background:var(--cbg);color:var(--c);display:grid;place-items:center;flex:none}
+.tile b{display:block;font-weight:600;font-size:14.5px;line-height:1.2}
+.tile small{display:block;color:var(--muted);font-size:12px;line-height:1.25;margin-top:2px}
+.tile:disabled{opacity:.38;cursor:not-allowed}
+.tile.next{border-color:var(--c);box-shadow:0 0 0 1px var(--c) inset}
+.tile.work{--c:var(--work);--cbg:var(--work-bg)}
+.tile.pause{--c:var(--pause);--cbg:var(--pause-bg)}
+.tile.danger{--c:var(--danger);--cbg:var(--danger-bg)}
+details.help{margin-top:14px;color:var(--muted);font-size:13px}
+details.help summary{cursor:pointer;display:inline-flex;align-items:center;gap:6px;list-style:none}
+details.help summary::-webkit-details-marker{display:none}
+details.help p{margin:8px 0 0;max-width:70ch}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat{display:flex;gap:10px;align-items:center;background:var(--surface-2);border-radius:var(--radius-m);padding:12px;min-width:0}
+.stat .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--surface);color:var(--c,var(--muted))}
+.stat small{display:block;color:var(--muted);font-size:12px}
+.stat strong{display:block;font-size:20px;font-weight:600;line-height:1.15}
+.c-shift{--c:var(--shift)}.c-work{--c:var(--work)}.c-pause{--c:var(--pause)}.c-drive{--c:var(--drive)}
+
+.timeline{margin-top:16px}
+.bar{position:relative;height:16px;border-radius:999px;background:var(--drive-bg);overflow:hidden}
+.bar span{position:absolute;top:0;bottom:0}
+.bar .w{background:var(--work)}.bar .p{background:var(--pause)}
+.bar-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+/* Segmented */
+.seg{display:inline-flex;background:var(--surface-2);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(20,33,61,.12)}
+
+.places{margin-top:16px;display:grid;gap:9px}
+.place-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;font-size:14px}
+.place-row .nm{display:flex;align-items:center;gap:6px;min-width:0}
+.place-row .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.place-row .nm .i{color:var(--muted)}
+.place-row .track{grid-column:1/-1;height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.place-row .track span{display:block;height:100%;background:var(--work);border-radius:99px}
+.sub-h{font-size:13px;color:var(--muted);margin:18px 0 0}
+
+/* Table */
+.table-wrap{overflow-x:auto;margin:0 -4px}
+table{width:100%;border-collapse:collapse;font-size:14px;white-space:nowrap}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-weight:500;color:var(--muted);font-size:12.5px}
+tr:last-child td{border-bottom:0}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:3px 9px 3px 7px;border-radius:999px;font-size:12.5px;font-weight:500;background:var(--cbg);color:var(--c)}
+.tag.work{--c:var(--work);--cbg:var(--work-bg)}.tag.pause{--c:var(--pause);--cbg:var(--pause-bg)}
+.empty{display:flex;align-items:center;gap:10px;color:var(--muted);padding:18px 4px;font-size:14px}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.tabs button{display:inline-flex;align-items:center;gap:7px;border:0;background:none;padding:9px 12px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+.day-pick{display:flex;gap:8px;align-items:center}
+.day-pick select{min-width:220px}
+.day-total{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:6px}
+.day-total b{color:var(--ink);font-weight:600}
+
+.editor input,.editor select{min-height:38px;padding:7px 9px;font-size:14px;min-width:150px}
+.icon-btn{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;color:var(--muted)}
+.icon-btn.ok:hover{color:var(--work);border-color:var(--work)}
+.icon-btn.del:hover{color:var(--danger);border-color:var(--danger)}
+.warn{display:flex;gap:9px;align-items:flex-start;background:var(--pause-bg);color:var(--ink);padding:10px 12px;border-radius:var(--radius-m);font-size:13px;margin-bottom:12px}
+.warn .i{color:var(--pause);margin-top:1px}
+.add-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);align-items:end}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:var(--radius-m);padding:10px 14px;font-weight:500;cursor:pointer;min-height:44px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.btn.primary:hover{opacity:.9}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px}
+.muted{color:var(--muted);font-size:13px;max-width:70ch}
+.export-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.export-grid h3{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;margin:0 0 6px}
+.export-grid h3 .i{color:var(--muted)}
+
+/* Toast */
+.toast-wrap{position:fixed;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:grid;justify-items:center;gap:8px;pointer-events:none;z-index:50;padding:0 12px}
+.toast{display:flex;align-items:center;gap:9px;background:var(--ink);color:var(--surface);padding:11px 16px;border-radius:12px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:tin .25s ease-out;max-width:460px}
+.toast.warn .i{color:#F5B451}.toast.ok .i{color:#4CD6A0}.toast.err .i{color:#FF8A78}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+@media (max-width:860px){.grid-2{grid-template-columns:1fr}.export-grid{grid-template-columns:1fr}}
+@media (max-width:640px){
+  main{padding:12px 10px 32px}
+  .card{padding:15px;border-radius:15px}
+  .actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .state{flex-wrap:wrap}
+  .timer{margin-left:0;text-align:left;width:100%}
+  .now .t{font-size:18px}
+  .brand h1{font-size:18px}
+  .mark{width:38px;height:38px}
+  .add-row{grid-template-columns:1fr}
+  .day-pick select{min-width:0}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></symbol>
+  <symbol id="i-car" viewBox="0 0 24 24"><path d="M5 11l1.6-4.3A2 2 0 0 1 8.5 5.4h7a2 2 0 0 1 1.9 1.3L19 11"/><path d="M3.5 11h17a1 1 0 0 1 1 1v4.5a1 1 0 0 1-1 1H19M5 17.5H3.5a1 1 0 0 1-1-1V12a1 1 0 0 1 1-1"/><circle cx="7.5" cy="17.5" r="2"/><circle cx="16.5" cy="17.5" r="2"/><path d="M9.5 17.5h5"/></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8.5 7V5.5A1.5 1.5 0 0 1 10 4h4a1.5 1.5 0 0 1 1.5 1.5V7"/><path d="M3 12.5h18"/><path d="M11 12.5v1.5h2v-1.5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 12v6.5A2.5 2.5 0 0 1 17.5 21h-11A2.5 2.5 0 0 1 4 18.5v-11A2.5 2.5 0 0 1 6.5 5H15"/><path d="m9 11 3 3 8.5-8.5"/></symbol>
+  <symbol id="i-coffee" viewBox="0 0 24 24"><path d="M17 9h1.5a3 3 0 0 1 0 6H17"/><path d="M3.5 9H17v6.5a4.5 4.5 0 0 1-4.5 4.5h-4.5A4.5 4.5 0 0 1 3.5 15.5z"/><path d="M7 2.5v3M10.3 2.5v3M13.6 2.5v3"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9v11a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9"/><path d="M10 21v-5.5h4V21"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21.5s7-6.6 7-12a7 7 0 0 0-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17.5h.01M12 17.5h.01"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 21h18"/><rect x="5" y="11" width="3" height="7" rx="1"/><rect x="10.5" y="6" width="3" height="12" rx="1"/><rect x="16" y="13" width="3" height="5" rx="1"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4.5 17.5a8.5 8.5 0 1 1 15 0"/><path d="m12 13 4-4.5"/><circle cx="12" cy="13.5" r="1.3"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4.5" cy="6" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="18" r="1.2"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20h4.5L19.5 9a2.1 2.1 0 0 0-3-3L5.5 17v3"/><path d="m14.5 8 3 3"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12.2A2 2 0 0 0 9 21h6a2 2 0 0 0 2-1.8L18 7"/><path d="M9 7V4.5h6V7"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3.5v11.5"/><path d="m7 10.5 5 5 5-5"/><path d="M4.5 20.5h15"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 20V8.5"/><path d="m7 13 5-5 5 5"/><path d="M4.5 3.5h15"/></symbol>
+  <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M3.5 9h17M3.5 14.5h17M9.5 9v11.5"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/><path d="M4.5 5.5v13c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-13"/><path d="M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 4.2 2.6 17.5A2 2 0 0 0 4.3 20.5h15.4a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4.5M12 17.2h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8h.01"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18h7a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7h7"/></symbol>
+</svg>
+
+<main>
+  <header class="top">
+    <div class="brand">
+      <div class="mark"><svg class="i lg"><use href="#i-clock"/></svg></div>
+      <div>
+        <h1>Работно време</h1>
+        <p>Смени, објекти и паузи</p>
+      </div>
+    </div>
+    <div class="now">
+      <div class="t tnum" id="clockTime">00:00:00</div>
+      <div class="d" id="clockDate"></div>
+    </div>
+  </header>
+
+  <section class="card hero" id="hero" data-state="idle">
+    <div class="state">
+      <div class="state-ic" id="stateIcon"><svg class="i lg"><use href="#i-moon"/></svg></div>
+      <div class="state-txt">
+        <p class="state-title" id="stateTitle">Смената не е започната</p>
+        <p class="state-sub" id="stateSub">Притисни „Почеток на смена“ кога тргнуваш од дома.</p>
+      </div>
+      <div class="timer" id="timerBox" hidden>
+        <b class="tnum" id="segTimer">0:00:00</b>
+        <small><span class="pulse"></span><span id="segLabel">во тек</span></small>
+      </div>
+    </div>
+
+    <label class="lbl" for="place">Град / објект</label>
+    <div class="input-ic">
+      <svg class="i"><use href="#i-pin"/></svg>
+      <input id="place" type="text" placeholder="Пример: Штип – Маркет 1" autocomplete="off">
+    </div>
+    <div class="chips" id="recentPlaces"></div>
+
+    <div class="actions">
+      <button class="tile" id="startShift" data-act="startShift">
+        <span class="ic"><svg class="i"><use href="#i-car"/></svg></span>
+        <span><b>Почеток на смена</b><small>Тргнуваш од дома</small></span>
+      </button>
+      <button class="tile work" id="startWork" data-act="startWork">
+        <span class="ic"><svg class="i"><use href="#i-briefcase"/></svg></span>
+        <span><b>Почеток на работа</b><small>Пристигна на објект</small></span>
+      </button>
+      <button class="tile work" id="endWork" data-act="endWork">
+        <span class="ic"><svg class="i"><use href="#i-check"/></svg></span>
+        <span><b>Крај на работа</b><small>Заврши на објектот</small></span>
+      </button>
+      <button class="tile pause" id="pause" data-act="startPause">
+        <span class="ic"><svg class="i"><use href="#i-coffee"/></svg></span>
+        <span><b>Пауза</b><small>Кратка или ручек</small></span>
+      </button>
+      <button class="tile pause" id="resume" data-act="endPause">
+        <span class="ic"><svg class="i"><use href="#i-play"/></svg></span>
+        <span><b>Продолжи</b><small>Крај на паузата</small></span>
+      </button>
+      <button class="tile danger" id="endShift" data-act="endShift">
+        <span class="ic"><svg class="i"><use href="#i-home"/></svg></span>
+        <span><b>Крај на смена</b><small>Стигна дома</small></span>
+      </button>
+    </div>
+
+    <details class="help">
+      <summary><svg class="i sm"><use href="#i-info"/></svg>Како функционира</summary>
+      <p>Почеток на смена е кога тргнуваш од дома, а крај на смена кога се враќаш дома. Кога ќе започнеш активна работа, избраниот град/објект останува поврзан со таа работа сè до „Крај на работа“. Во една смена може да има повеќе делови работа на различни објекти. Пауза за време на работа не ја прекинува работата: делот продолжува, а времето на паузата се одзема од нето работата на тој дел. Времето кога не работиш и не си на пауза се брои како возење / слободно.</p>
+    </details>
+  </section>
+
+  <div class="grid-2 stack">
+    <section class="card">
+      <div class="card-head">
+        <h2><svg class="i"><use href="#i-gauge"/></svg><span id="shiftHeading">Тековна смена</span></h2>
+      </div>
+      <div class="stats">
+        <div class="stat c-shift"><span class="ic"><svg class="i"><use href="#i-clock"/></svg></span><div><small>Вкупно смена</small><strong class="tnum" id="totalShift">0:00</strong></div></div>
+        <div class="stat c-work"><span class="ic"><svg class="i"><use href="#i-briefcase"/></svg></span><div><small>Активна работа</small><strong class="tnum" id="totalWork">0:00</strong></div></div>
+        <div class="stat c-pause"><span class="ic"><svg class="i"><use href="#i-coffee"/></svg></span><div><small>Пауза</small><strong class="tnum" id="totalPause">0:00</strong></div></div>
+        <div class="stat c-drive"><span class="ic"><svg class="i"><use href="#i-route"/></svg></span><div><small>Возење / слободно</small><strong class="tnum" id="totalFree">0:00</strong></div></div>
+      </div>
+      <div class="timeline" id="timeline" hidden>
+        <div class="bar" id="timelineBar"></div>
+        <div class="bar-meta tnum"><span id="tlStart"></span><span id="tlEnd"></span></div>
+        <div class="legend">
+          <span><i style="background:var(--work)"></i>Работа</span>
+          <span><i style="background:var(--pause)"></i>Пауза</span>
+          <span><i style="background:var(--drive-bg);border:1px solid var(--line)"></i>Возење / слободно</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2><svg class="i"><use href="#i-chart"/></svg>Збир</h2>
+        <div class="seg" role="group" aria-label="Период">
+          <button data-period="today" aria-pressed="true">Денес</button>
+          <button data-period="week" aria-pressed="false">Недела</button>
+          <button data-period="month" aria-pressed="false">Месец</button>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat c-work"><span class="ic"><svg class="i"><use href="#i-briefcase"/></svg></span><div><small>Работа</small><strong class="tnum" id="pWork">0:00</strong></div></div>
+        <div class="stat c-shift"><span class="ic"><svg class="i"><use href="#i-calendar"/></svg></span><div><small>Смени</small><strong class="tnum" id="pShifts">0</strong></div></div>
+        <div class="stat c-pause"><span class="ic"><svg class="i"><use href="#i-coffee"/></svg></span><div><small>Пауза</small><strong class="tnum" id="pPause">0:00</strong></div></div>
+        <div class="stat c-drive"><span class="ic"><svg class="i"><use href="#i-route"/></svg></span><div><small>Возење / слободно</small><strong class="tnum" id="pFree">0:00</strong></div></div>
+      </div>
+      <p class="sub-h">Работа по објект</p>
+      <div class="places" id="placeBreakdown"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <div class="card-head">
+      <h2><svg class="i"><use href="#i-calendar"/></svg>Ден</h2>
+      <div class="day-pick">
+        <select id="daySelect" aria-label="Избери ден"></select>
+      </div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="intervals"><svg class="i sm"><use href="#i-list"/></svg>Интервали</button>
+      <button role="tab" aria-selected="false" data-tab="editor"><svg class="i sm"><use href="#i-pencil"/></svg>Исправка</button>
+    </div>
+
+    <div id="tab-intervals">
+      <div class="day-total" id="dayTotal"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Тип</th><th>Град / објект</th><th>Почеток</th><th>Крај</th><th>Траење</th><th>Одземена пауза</th><th>Нето работа</th></tr></thead>
+          <tbody id="intervalRows"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="emptyIntervals"><svg class="i"><use href="#i-list"/></svg>Нема интервали за овој ден. Започни смена за да се појават.</div>
+    </div>
+
+    <div id="tab-editor" hidden>
+      <div class="warn"><svg class="i"><use href="#i-alert"/></svg><span>Исправките веднаш се зачувуваат во овој прелистувач. Провери го редоследот на настаните пред да ја симнеш архивата.</span></div>
+      <div class="table-wrap editor">
+        <table>
+          <thead><tr><th>Датум и време</th><th>Тип на настан</th><th>Град / објект</th><th></th></tr></thead>
+          <tbody id="eventEditorRows"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="emptyEditor"><svg class="i"><use href="#i-pencil"/></svg>Нема настани за избраниот ден.</div>
+      <div class="add-row editor">
+        <div><label class="lbl" for="newAt">Датум и време</label><input id="newAt" type="datetime-local"></div>
+        <div><label class="lbl" for="newType">Тип на настан</label><select id="newType"></select></div>
+        <div><label class="lbl" for="newPlace">Град / објект</label><input id="newPlace" type="text" placeholder="Ако е потребно"></div>
+        <button class="btn primary" id="addEventBtn"><svg class="i"><use href="#i-plus"/></svg>Додај настан</button>
+      </div>
+      <p class="muted">Заборавил да притисне копче? Додај го настанот рачно со точното време.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="export-grid">
+      <div>
+        <h3><svg class="i"><use href="#i-sheet"/></svg>Извештај за Excel</h3>
+        <p class="muted">Excel датотека со четири листови: збир по ден, по ден и локација, по локација и детали за секој дел.</p>
+        <div class="btn-row">
+          <button class="btn primary" id="xlsDay"><svg class="i"><use href="#i-download"/></svg>Избраниот ден</button>
+          <button class="btn" id="xlsMonth"><svg class="i"><use href="#i-download"/></svg>Овој месец</button>
+          <button class="btn" id="xlsAll"><svg class="i"><use href="#i-download"/></svg>Сите денови</button>
+        </div>
+      </div>
+      <div>
+        <h3><svg class="i"><use href="#i-db"/></svg>Резервна копија</h3>
+        <p class="muted">Податоците живеат само во овој прелистувач. Зачувај копија одвреме-навреме, или префрли ги на друг телефон.</p>
+        <div class="btn-row">
+          <button class="btn" id="backupOut"><svg class="i"><use href="#i-download"/></svg>Зачувај копија</button>
+          <button class="btn" id="backupIn"><svg class="i"><use href="#i-upload"/></svg>Врати од копија</button>
+          <input type="file" id="backupFile" accept=".json,application/json" hidden>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast-wrap" id="toasts" aria-live="polite"></div>
+
+<script>
+const STORAGE_KEY='rv_app_v1';
+const DRAFT_KEY='rv_place_draft';
+const TYPES={
+  SHIFT_START:'Почеток на смена',
+  SHIFT_END:'Крај на смена',
+  WORK_START:'Почеток на активна работа',
+  WORK_END:'Крај на активна работа',
+  PAUSE_START:'Почеток на пауза',
+  PAUSE_END:'Крај на пауза'
+};
+const TYPE_KEYS=Object.keys(TYPES);
+const WORK='Активна работа',PAUSE='Пауза';
+const weekdays=['недела','понеделник','вторник','среда','четврток','петок','сабота'];
+const $=id=>document.getElementById(id);
+const ic=(n,c='')=>`<svg class="i ${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+
+/* ---------- Toast ---------- */
+function toast(msg,kind='ok'){
+  const t=document.createElement('div');
+  t.className='toast '+kind;
+  t.innerHTML=ic(kind==='ok'?'save':kind==='err'?'alert':'info')+'<span></span>';
+  t.querySelector('span').textContent=msg;
+  $('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),3200);
+}
+function buzz(){try{navigator.vibrate&&navigator.vibrate(25)}catch(e){}}
+
+/* ---------- Storage ---------- */
+let loadFailed=false;
+function loadData(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw)return{events:[],session:null};
+    const p=JSON.parse(raw);
+    if(Array.isArray(p))return{events:p,session:null};
+    if(p&&Array.isArray(p.events))return{events:p.events,session:p.session||null};
+    return{events:[],session:null};
+  }catch(e){loadFailed=true;return{events:[],session:null}}
+}
+let db=loadData();
+function saveData(){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
+  catch(e){toast('Податоците не можат да се зачуваат во овој прелистувач.','err')}
+}
+
+/* ---------- Events ---------- */
+const eventDate=e=>new Date(e.at||`${e.date}T${e.time||'00:00'}:00`);
+const sortedEvents=()=>[...db.events].sort((a,b)=>eventDate(a)-eventDate(b)||(a.id||0)-(b.id||0));
+function addEvent(type,place='',at=new Date().toISOString()){
+  const e={id:Date.now()+Math.random(),at,type,place:place||'',resumeWork:false};
+  db.events.push(e);saveData();return e;
+}
+function currentSessionState(){
+  let shift=false,work=false,pause=false;
+  for(const e of sortedEvents()){
+    if(e.type==='SHIFT_START'){shift=true;work=false;pause=false}
+    else if(e.type==='SHIFT_END'){shift=false;work=false;pause=false}
+    else if(shift&&e.type==='WORK_START'){work=true}
+    else if(shift&&e.type==='WORK_END'){work=false;pause=false}
+    else if(shift&&e.type==='PAUSE_START'){pause=true}
+    else if(shift&&e.type==='PAUSE_END'){pause=false}
+  }
+  return{shift,work,pause};
+}
+const lastOf=type=>[...sortedEvents()].reverse().find(e=>e.type===type);
+
+/* ---------- Actions ---------- */
+const actions={
+  startShift(){
+    if(currentSessionState().shift)return toast('Смената веќе е започната.','warn');
+    addEvent('SHIFT_START');toast('Смената започна. Среќен пат!');
+  },
+  startWork(){
+    const s=currentSessionState();
+    if(!s.shift)return toast('Прво започни смена.','warn');
+    if(s.work)return toast('Работата веќе е започната. Прво притисни „Крај на работа“.','warn');
+    if(s.pause)return toast('Прво заврши ја паузата.','warn');
+    const place=$('place').value.trim();
+    if(!place){$('place').focus();return toast('Внеси град или име на објект.','warn')}
+    addEvent('WORK_START',place);toast('Работа започната: '+place);
+  },
+  endWork(){
+    const s=currentSessionState();
+    if(!s.shift||!s.work)return toast('Нема започната активна работа.','warn');
+    const last=lastOf('WORK_START'),t=Date.now();
+    if(s.pause){const ps=lastOf('PAUSE_START');addEvent('PAUSE_END',ps?ps.place:'',new Date(t).toISOString())}
+    addEvent('WORK_END',last?last.place:'',new Date(t+1).toISOString());
+    toast('Делот на '+(last&&last.place?last.place:'објектот')+' е завршен: '+duration(lastPart&&lastPart().dur||0)+' нето.');
+  },
+  startPause(){
+    const s=currentSessionState();
+    if(!s.shift)return toast('Прво започни смена.','warn');
+    if(s.pause)return toast('Паузата веќе е започната.','warn');
+    const lw=lastOf('WORK_START');
+    const e=addEvent('PAUSE_START',lw?lw.place:$('place').value.trim());
+    e.resumeWork=s.work;saveData();toast(s.work?'Пауза. Работата продолжува, паузата ќе се одземе.':'Пауза. Пријатно!');
+  },
+  endPause(){
+    const s=currentSessionState();
+    if(!s.shift||!s.pause)return toast('Нема активна пауза.','warn');
+    const start=lastOf('PAUSE_START');
+    const e=addEvent('PAUSE_END',start?start.place:'');
+    e.resumeWork=s.work;saveData();toast(s.work?'Паузата заврши. Работата продолжува.':'Паузата заврши.');
+  },
+  endShift(){
+    const st=currentSessionState();
+    if(!st.shift)return toast('Нема активна смена.','warn');
+    if(!confirm('Дали сигурно сакаш да ја завршиш смената?'))return;
+    addEvent('SHIFT_END');toast('Смената е завршена. Добредојде дома!');
+  }
+};
+document.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>{buzz();actions[b.dataset.act]();render()}));
+
+/* ---------- Calculation ---------- */
+function lastPart(){const c=calculate();return c.intervals.filter(i=>i.type===WORK).pop()}
+function currentPartNet(){
+  const w=lastOf('WORK_START');if(!w)return 0;
+  const st=eventDate(w),now=new Date();let p=0,ps=null;
+  for(const e of sortedEvents()){const t=eventDate(e);if(t<st)continue;
+    if(e.type==='PAUSE_START'&&!ps)ps=t;else if(e.type==='PAUSE_END'&&ps){p+=t-ps;ps=null}}
+  if(ps)p+=now-ps;return Math.max(0,now-st-p);
+}
+function overlap(i,pauses){return pauses.reduce((n,p)=>n+Math.max(0,Math.min(i.end,p.end)-Math.max(i.start,p.start)),0)}
+function calculate(){
+  const events=sortedEvents(),intervals=[],shifts=[];
+  let shift=null,workStart=null,workPlace='',pauseStart=null,pausePlace='';
+  const add=(type,start,end,place)=>{if(start&&end&&end>=start)intervals.push({type,start,end,place:place||''})};
+  for(const e of events){
+    const t=eventDate(e);
+    if(e.type==='SHIFT_START'){
+      if(shift&&!shift.end)shift.end=t;
+      shift={start:t,end:null};shifts.push(shift);workStart=null;pauseStart=null;continue;
+    }
+    if(!shift)continue;
+    if(e.type==='WORK_START'){if(workStart)add(WORK,workStart,t,workPlace);workStart=t;workPlace=e.place||''}
+    else if(e.type==='WORK_END'){if(workStart)add(WORK,workStart,t,workPlace);workStart=null}
+    else if(e.type==='PAUSE_START'){if(!pauseStart){pauseStart=t;pausePlace=e.place||workPlace||''}}
+    else if(e.type==='PAUSE_END'){if(pauseStart)add(PAUSE,pauseStart,t,pausePlace);pauseStart=null}
+    else if(e.type==='SHIFT_END'){
+      if(workStart){add(WORK,workStart,t,workPlace);workStart=null}
+      if(pauseStart){add(PAUSE,pauseStart,t,pausePlace);pauseStart=null}
+      shift.end=t;
+    }
+  }
+  const now=new Date();
+  if(shift&&!shift.end){
+    if(workStart)add(WORK,workStart,now,workPlace);
+    if(pauseStart)add(PAUSE,pauseStart,now,pausePlace);
+  }
+  const pausesAll=intervals.filter(i=>i.type===PAUSE);
+  const worksAll=intervals.filter(i=>i.type===WORK);
+  intervals.forEach(i=>{
+    i.gross=Math.max(0,i.end-i.start);
+    i.pauseIn=i.type===WORK?overlap(i,pausesAll):0;
+    i.dur=Math.max(0,i.gross-i.pauseIn);
+    if(i.type===PAUSE)i.inWork=overlap(i,worksAll)>0;
+  });
+  const summaries=shifts.map(s=>{
+    const end=s.end||now,total=Math.max(0,end-s.start);
+    const own=intervals.filter(i=>i.start>=s.start&&i.end<=end);
+    const pause=own.filter(i=>i.type===PAUSE).reduce((n,i)=>n+i.dur,0);
+    const work=own.filter(i=>i.type===WORK).reduce((n,i)=>n+Math.max(0,i.dur),0);
+    return{start:s.start,end:s.end,total,work,pause,free:Math.max(0,total-work-pause),open:!s.end,intervals:own};
+  });
+  return{intervals,shifts:summaries};
+}
+
+/* ---------- Formatting ---------- */
+function duration(ms){const m=Math.max(0,Math.floor(ms/60000));return`${Math.floor(m/60)}:${String(m%60).padStart(2,'0')}`}
+function durationSec(ms){const s=Math.max(0,Math.floor(ms/1000));return`${Math.floor(s/3600)}:${String(Math.floor(s/60)%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
+const pad=n=>String(n).padStart(2,'0');
+const dayName=d=>weekdays[new Date(d).getDay()];
+function dateText(d){const x=new Date(d);return`${pad(x.getDate())}.${pad(x.getMonth()+1)}.${x.getFullYear()}`}
+function timeText(d){const x=new Date(d);return`${pad(x.getHours())}:${pad(x.getMinutes())}`}
+function dateKey(d){const x=new Date(d);return`${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}`}
+function localInputValue(d){const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,16)}
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- Clock & live state ---------- */
+function updateClock(){
+  const d=new Date();
+  $('clockTime').textContent=`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  const dn=dayName(d);
+  $('clockDate').textContent=`${dn[0].toUpperCase()+dn.slice(1)}, ${dateText(d)}`;
+  updateHero();
+}
+function updateHero(){
+  const s=currentSessionState(),hero=$('hero');
+  const ev=sortedEvents(),last=ev[ev.length-1];
+  let state='idle',iconName='moon',title='Смената не е започната',sub='Притисни „Почеток на смена“ кога тргнуваш од дома.',label='';
+  if(s.shift){
+    const sh=lastOf('SHIFT_START');
+    const shiftFor=sh?' · смена '+durationSec(new Date()-eventDate(sh)).slice(0,-3):'';
+    const w=lastOf('WORK_START'),wp=w&&w.place?w.place:'Објект';
+    if(s.pause&&s.work){state='pause';iconName='coffee';title='Пауза за време на работа';sub=wp+' · нето работа '+durationSec(currentPartNet()).slice(0,-3)+shiftFor;label='пауза трае (се одзема)'}
+    else if(s.pause){state='pause';iconName='coffee';title='На пауза';sub='Пауза надвор од објект'+shiftFor;label='пауза трае'}
+    else if(s.work){state='work';iconName='briefcase';title='Работиш на објект';sub=wp+shiftFor;label='нето работа на овој дел'}
+    else{state='drive';iconName='car';title='Возење / слободно';sub='Смената е активна, не е започната работа на објект'+shiftFor;label='од последниот настан'}
+  }
+  if(hero.dataset.state!==state){
+    hero.dataset.state=state;
+    $('stateIcon').innerHTML=ic(iconName,'lg');
+  }
+  $('stateTitle').textContent=title;
+  $('stateSub').textContent=sub;
+  $('timerBox').hidden=!s.shift;
+  if(s.shift&&last){
+    let ms;
+    if(s.pause)ms=new Date()-eventDate(lastOf('PAUSE_START'));
+    else if(s.work)ms=currentPartNet();
+    else ms=new Date()-eventDate(last);
+    $('segTimer').textContent=durationSec(ms);$('segLabel').textContent=label;
+  }
+}
+
+/* ---------- Render ---------- */
+let period='today',daySel='',tab='intervals',calc=null;
+
+function render(){
+  const s=currentSessionState();
+  $('startShift').disabled=s.shift;
+  $('startWork').disabled=!s.shift||s.work||s.pause;
+  $('endWork').querySelector('small').textContent=s.pause&&s.work?'Ја затвора и паузата':'Заврши на објектот';
+  $('pause').querySelector('small').textContent=s.work?'Се одзема од работата':'Кратка или ручек';
+  $('endWork').disabled=!s.shift||!s.work;
+  $('pause').disabled=!s.shift||s.pause;
+  $('resume').disabled=!s.shift||!s.pause;
+  $('endShift').disabled=!s.shift;
+  const next=!s.shift?'startShift':s.pause?'resume':s.work?'endWork':'startWork';
+  document.querySelectorAll('.tile').forEach(t=>t.classList.toggle('next',t.id===next));
+
+  calc=calculate();
+  renderShift();renderRecent();renderPeriod();updateDaySelect();renderDay();updateHero();
+}
+
+function renderShift(){
+  const cur=[...calc.shifts].reverse().find(x=>x.open);
+  const shown=cur||calc.shifts[calc.shifts.length-1];
+  $('shiftHeading').textContent=cur?'Тековна смена':shown?'Последна смена':'Тековна смена';
+  $('totalShift').textContent=shown?duration(shown.total):'0:00';
+  $('totalWork').textContent=shown?duration(shown.work):'0:00';
+  $('totalPause').textContent=shown?duration(shown.pause):'0:00';
+  $('totalFree').textContent=shown?duration(shown.free):'0:00';
+  const tl=$('timeline');
+  if(!shown||shown.total<=0){tl.hidden=true;return}
+  tl.hidden=false;
+  const st=+shown.start,en=+(shown.end||new Date()),span=en-st;
+  $('timelineBar').innerHTML=[...shown.intervals].sort((a,b)=>(a.type===PAUSE)-(b.type===PAUSE)).map(i=>{
+    const l=(i.start-st)/span*100,w=Math.max(.4,(i.end-i.start)/span*100);
+    return`<span class="${i.type===WORK?'w':'p'}" style="left:${l}%;width:${w}%" title="${esc(i.type)} ${timeText(i.start)}–${timeText(i.end)} ${esc(i.place)}"></span>`;
+  }).join('');
+  $('tlStart').textContent=timeText(st)+' тргнување';
+  $('tlEnd').textContent=shown.end?timeText(en)+' дома':'сега '+timeText(en);
+}
+
+function renderRecent(){
+  const seen=new Set(),list=[];
+  for(const e of [...sortedEvents()].reverse()){
+    const p=(e.place||'').trim();
+    if(p&&!seen.has(p.toLowerCase())){seen.add(p.toLowerCase());list.push(p)}
+    if(list.length>=6)break;
+  }
+  const cur=$('place').value.trim().toLowerCase();
+  $('recentPlaces').innerHTML=list.map(p=>`<button type="button" class="chip${p.toLowerCase()===cur?' on':''}" data-place="${esc(p)}">${ic('pin','sm')}<span>${esc(p)}</span></button>`).join('');
+}
+$('recentPlaces').addEventListener('click',e=>{
+  const c=e.target.closest('.chip');if(!c)return;
+  $('place').value=c.dataset.place;saveDraft();renderRecent();
+});
+function saveDraft(){try{localStorage.setItem(DRAFT_KEY,$('place').value)}catch(e){}}
+$('place').addEventListener('input',()=>{saveDraft();renderRecent()});
+
+function periodStart(p){
+  const n=new Date(),s=new Date(n.getFullYear(),n.getMonth(),n.getDate());
+  if(p==='week')s.setDate(s.getDate()-((s.getDay()+6)%7));
+  if(p==='month')s.setDate(1);
+  return s;
+}
+function renderPeriod(){
+  const from=periodStart(period);
+  const sh=calc.shifts.filter(s=>s.start>=from);
+  const sum=k=>sh.reduce((n,s)=>n+s[k],0);
+  $('pWork').textContent=duration(sum('work'));
+  $('pPause').textContent=duration(sum('pause'));
+  $('pFree').textContent=duration(sum('free'));
+  $('pShifts').textContent=sh.length;
+  const by={};
+  calc.intervals.filter(i=>i.type===WORK&&i.start>=from).forEach(i=>{const k=i.place||'Без објект';by[k]=(by[k]||0)+i.dur});
+  const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]);
+  const max=rows.length?rows[0][1]:1;
+  $('placeBreakdown').innerHTML=rows.length?rows.slice(0,8).map(([p,ms])=>`<div class="place-row"><span class="nm">${ic('pin','sm')}<span>${esc(p)}</span></span><b class="tnum">${duration(ms)}</b><span class="track"><span style="width:${Math.max(3,ms/max*100)}%"></span></span></div>`).join('')
+    :`<div class="empty">${ic('briefcase')}Нема работа на објект во овој период.</div>`;
+}
+document.querySelectorAll('[data-period]').forEach(b=>b.addEventListener('click',()=>{
+  period=b.dataset.period;
+  document.querySelectorAll('[data-period]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  renderPeriod();
+}));
+
+function updateDaySelect(){
+  const days=[...new Set(sortedEvents().map(e=>dateKey(eventDate(e))))].sort().reverse();
+  const el=$('daySelect');el.innerHTML='';
+  if(!days.length){el.add(new Option('Нема зачувани денови',''));daySel='';el.disabled=true;return}
+  el.disabled=false;
+  const today=dateKey(new Date());
+  for(const day of days){
+    const[y,m,d]=day.split('-');
+    const nm=dayName(new Date(+y,+m-1,+d));
+    el.add(new Option(`${d}.${m}.${y} — ${nm}${day===today?' (денес)':''}`,day));
+  }
+  if(!days.includes(daySel))daySel=days[0];
+  el.value=daySel;
+}
+$('daySelect').addEventListener('change',e=>{daySel=e.target.value;renderDay()});
+
+function renderDay(){
+  const ints=calc.intervals.filter(i=>dateKey(i.start)===daySel).sort((a,b)=>a.start-b.start);
+  $('emptyIntervals').style.display=ints.length?'none':'flex';
+  $('intervalRows').innerHTML=ints.map(i=>{
+    const w=i.type===WORK;
+    return`<tr><td><span class="tag ${w?'work':'pause'}">${ic(w?'briefcase':'coffee','sm')}${w?'Работа':i.inWork?'Пауза во работа':'Пауза'}</span></td><td>${esc(i.place||'—')}</td><td class="tnum">${timeText(i.start)}</td><td class="tnum">${timeText(i.end)}</td><td class="tnum">${duration(i.gross)}</td><td class="tnum">${w?(i.pauseIn?'− '+duration(i.pauseIn):'—'):'—'}</td><td class="tnum">${w?'<b>'+duration(i.dur)+'</b>':'—'}</td></tr>`;
+  }).join('');
+  const dsh=calc.shifts.filter(s=>dateKey(s.start)===daySel);
+  const t=k=>duration(dsh.reduce((n,s)=>n+s[k],0));
+  $('dayTotal').innerHTML=dsh.length?`<span>Смена <b class="tnum">${t('total')}</b></span><span>Работа <b class="tnum">${t('work')}</b></span><span>Пауза <b class="tnum">${t('pause')}</b></span><span>Возење / слободно <b class="tnum">${t('free')}</b></span>`:'';
+
+  const events=sortedEvents().filter(e=>daySel&&dateKey(eventDate(e))===daySel);
+  $('emptyEditor').style.display=events.length?'none':'flex';
+  $('eventEditorRows').innerHTML=events.map(e=>{
+    const opts=TYPE_KEYS.map(k=>`<option value="${k}"${e.type===k?' selected':''}>${esc(TYPES[k])}</option>`).join('');
+    return`<tr data-id="${e.id}"><td><input type="datetime-local" class="f-dt" value="${localInputValue(eventDate(e))}"></td><td><select class="f-type">${opts}</select></td><td><input type="text" class="f-place" value="${esc(e.place||'')}" placeholder="Град / објект"></td><td><button class="icon-btn ok" data-save title="Зачувај" aria-label="Зачувај">${ic('save')}</button> <button class="icon-btn del" data-del title="Избриши" aria-label="Избриши">${ic('trash')}</button></td></tr>`;
+  }).join('');
+  const base=daySel?new Date(daySel+'T'+timeText(new Date())):new Date();
+  if(!$('newAt').value||$('newAt').dataset.day!==daySel){$('newAt').value=localInputValue(base);$('newAt').dataset.day=daySel}
+}
+$('eventEditorRows').addEventListener('click',ev=>{
+  const tr=ev.target.closest('tr');if(!tr)return;
+  const id=tr.dataset.id,e=db.events.find(x=>String(x.id)===id);if(!e)return;
+  if(ev.target.closest('[data-save]')){
+    const dt=tr.querySelector('.f-dt').value;
+    if(!dt)return toast('Внеси датум и време.','warn');
+    e.at=new Date(dt).toISOString();e.type=tr.querySelector('.f-type').value;e.place=tr.querySelector('.f-place').value.trim();
+    daySel=dateKey(new Date(dt));saveData();render();toast('Настанот е зачуван.');
+  }else if(ev.target.closest('[data-del]')){
+    if(!confirm('Сигурно сакаш да го избришеш овој настан?'))return;
+    db.events=db.events.filter(x=>String(x.id)!==id);saveData();render();toast('Настанот е избришан.');
+  }
+});
+$('newType').innerHTML=TYPE_KEYS.map(k=>`<option value="${k}">${esc(TYPES[k])}</option>`).join('');
+$('addEventBtn').addEventListener('click',()=>{
+  const dt=$('newAt').value;if(!dt)return toast('Внеси датум и време.','warn');
+  const type=$('newType').value,place=$('newPlace').value.trim();
+  if(type==='WORK_START'&&!place)return toast('За почеток на работа внеси град / објект.','warn');
+  const e=addEvent(type,place,new Date(dt).toISOString());
+  if(type==='PAUSE_START'){
+    const lw=sortedEvents().filter(x=>x.type==='WORK_START'&&eventDate(x)<=eventDate(e)).pop();
+    if(!e.place&&lw)e.place=lw.place;saveData();
+  }
+  if(type==='PAUSE_END'){
+    const ps=sortedEvents().filter(x=>x.type==='PAUSE_START'&&eventDate(x)<=eventDate(e)).pop();
+    e.resumeWork=!!(ps&&ps.resumeWork);if(!e.place&&ps)e.place=ps.place;saveData();
+  }
+  daySel=dateKey(new Date(dt));$('newPlace').value='';$('newAt').dataset.day='';
+  render();toast('Настанот е додаден.');
+});
+
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{
+  tab=b.dataset.tab;
+  document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x===b));
+  $('tab-intervals').hidden=tab!=='intervals';$('tab-editor').hidden=tab!=='editor';
+}));
+
+/* ---------- Excel export ---------- */
+function downloadBlob(parts,type,name){
+  const blob=new Blob(parts,{type}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+/* ---------- XLSX writer (no external library) ---------- */
+const enc=new TextEncoder();
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function zipStore(files){
+  const parts=[],central=[];let off=0;
+  for(const f of files){
+    const name=enc.encode(f.name),data=enc.encode(f.data),crc=crc32(data);
+    const h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(12,0x21,true);
+    h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,name.length,true);
+    parts.push(new Uint8Array(h.buffer),name,data);
+    const c=new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(14,0x21,true);
+    c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,name.length,true);c.setUint32(42,off,true);
+    central.push(new Uint8Array(c.buffer),name);
+    off+=30+name.length+data.length;
+  }
+  const cd=central.reduce((n,x)=>n+x.length,0),e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cd,true);e.setUint32(16,off,true);
+  return[...parts,...central,new Uint8Array(e.buffer)];
+}
+const xe=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');
+function colName(i){let s='';i++;while(i){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=Math.floor((i-1)/26)}return s}
+/* styles: 0 normal, 1 header, 2 date, 3 time, 4 duration, 5 total, 6 total duration, 7 title, 8 muted note */
+const serial=d=>{d=new Date(d);return(d.getTime()-d.getTimezoneOffset()*60000)/864e5+25569};
+const mins=ms=>Math.floor(Math.max(0,ms)/60000)/1440;
+const XD=d=>({v:Math.floor(serial(d)),s:2}),XT=d=>({v:Math.floor(serial(d)%1*1440+1e-6)/1440,s:3}),XH=ms=>({v:mins(ms),s:4}),XHT=()=>({sum:1,s:6});
+function sheetXml({title,note,head,rows,total,widths}){
+  let r=1,hr=0;const out=[];
+  const row=(cells,def)=>{const rr=r++;out.push(`<row r="${rr}">`+cells.map((c,i)=>{
+    const ref=colName(i)+rr;
+    if(c==null||c==='')return`<c r="${ref}" s="${def}"/>`;
+    if(typeof c==='object'&&c.sum)return`<c r="${ref}" s="${c.s}"><f>SUM(${colName(i)}${hr+1}:${colName(i)}${rr-1})</f></c>`;
+    if(typeof c==='object'){if(typeof c.v==='number')return`<c r="${ref}" s="${c.s}"><v>${c.v}</v></c>`;c={...c};return`<c r="${ref}" t="inlineStr" s="${c.s}"><is><t xml:space="preserve">${xe(c.v)}</t></is></c>`}
+    if(typeof c==='number')return`<c r="${ref}" s="${def}"><v>${c}</v></c>`;
+    return`<c r="${ref}" t="inlineStr" s="${def}"><is><t xml:space="preserve">${xe(c)}</t></is></c>`;
+  }).join('')+'</row>')};
+  row([{v:title,s:7}],0);row([{v:note,s:8}],0);r++;
+  hr=r;row(head.map(h=>({v:h,s:1})),1);
+  rows.forEach(x=>row(x,0));
+  if(total)row(total,5);
+  return`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="${hr}" topLeftCell="A${hr+1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${widths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${out.join('')}</sheetData></worksheet>`;
+}
+const STYLES=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="3"><numFmt numFmtId="164" formatCode="dd.mm.yyyy"/><numFmt numFmtId="165" formatCode="hh:mm"/><numFmt numFmtId="166" formatCode="[h]:mm"/></numFmts><fonts count="5"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="15"/><color rgb="FF14213D"/><name val="Calibri"/></font><font><i/><sz val="10"/><color rgb="FF5E6B80"/><name val="Calibri"/></font></fonts><fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF14213D"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE2F3EB"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="3"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FFDDE3EA"/></bottom><diagonal/></border><border><left/><right/><top style="thin"><color rgb="FF0E8A5F"/></top><bottom style="thin"><color rgb="FF0E8A5F"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="9"><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"><alignment horizontal="left"/></xf><xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="166" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="0" fontId="2" fillId="3" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="166" fontId="2" fillId="3" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+function buildXlsx(sheets){
+  const files=[
+    {name:'[Content_Types].xml',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`},
+    {name:'_rels/.rels',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`},
+    {name:'xl/workbook.xml',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((x,i)=>`<sheet name="${xe(x.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets></workbook>`},
+    {name:'xl/_rels/workbook.xml.rels',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((_,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`},
+    {name:'xl/styles.xml',data:STYLES},
+    ...sheets.map((x,i)=>({name:`xl/worksheets/sheet${i+1}.xml`,data:sheetXml(x)}))
+  ];
+  return zipStore(files);
+}
+
+function downloadArchive(pred,name,label){
+  const r=calculate();
+  const shifts=r.shifts.filter(s=>pred(s.start));
+  const works=r.intervals.filter(i=>i.type===WORK&&pred(i.start)).sort((a,b)=>a.start-b.start);
+  const pauses=r.intervals.filter(i=>i.type===PAUSE&&pred(i.start));
+  if(!shifts.length&&!works.length)return toast('Нема податоци за '+label+'.','warn');
+  const loc=i=>i.place||'Без објект';
+  const sum=(arr,k)=>arr.reduce((n,x)=>n+x[k],0);
+  const period=(()=>{const ds=[...shifts.map(s=>s.start),...works.map(w=>w.start)].sort((a,b)=>a-b);return ds.length?`Период: ${dateText(ds[0])} – ${dateText(ds[ds.length-1])} · Извештајот е креиран ${dateText(new Date())} во ${timeText(new Date())}`:''})();
+
+  /* 1. По ден */
+  const days={};
+  for(const s of shifts){const k=dateKey(s.start);(days[k]=days[k]||{date:s.start,start:s.start,end:null,open:false,total:0,work:0,pause:0,free:0,shifts:0});
+    const d=days[k];d.start=s.start<d.start?s.start:d.start;const e=s.end||new Date();d.end=!d.end||e>d.end?e:d.end;d.open=d.open||s.open;
+    d.total+=s.total;d.work+=s.work;d.pause+=s.pause;d.free+=s.free;d.shifts++;}
+  const dayRows=Object.keys(days).sort().map(k=>{const d=days[k];
+    const locs=new Set(works.filter(w=>dateKey(w.start)===k).map(loc));
+    return[XD(d.date),dayName(d.date),XT(d.start),d.open?'во тек':XT(d.end),XH(d.total),XH(d.work),XH(d.pause),XH(d.free),locs.size,works.filter(w=>dateKey(w.start)===k).length]});
+  const dl=Object.values(days);
+
+  /* 2. По ден и локација */
+  const dlMap={};
+  for(const w of works){const k=dateKey(w.start)+'|'+loc(w);(dlMap[k]=dlMap[k]||{date:w.start,place:loc(w),first:w.start,last:w.end,parts:0,gross:0,pause:0,net:0});
+    const x=dlMap[k];x.last=w.end>x.last?w.end:x.last;x.parts++;x.gross+=w.gross;x.pause+=w.pauseIn;x.net+=w.dur;}
+  const dlRows=Object.values(dlMap).sort((a,b)=>a.first-b.first).map(x=>[XD(x.date),dayName(x.date),x.place,XT(x.first),XT(x.last),x.parts,XH(x.gross),XH(x.pause),XH(x.net)]);
+
+  /* 3. По локација */
+  const lMap={};
+  for(const w of works){const k=loc(w);(lMap[k]=lMap[k]||{place:k,days:new Set(),parts:0,gross:0,pause:0,net:0});
+    const x=lMap[k];x.days.add(dateKey(w.start));x.parts++;x.gross+=w.gross;x.pause+=w.pauseIn;x.net+=w.dur;}
+  const lList=Object.values(lMap).sort((a,b)=>b.net-a.net);
+  const lRows=lList.map(x=>[x.place,x.days.size,x.parts,XH(x.gross),XH(x.pause),XH(x.net),XH(x.net/x.days.size)]);
+
+  /* 4. Детали */
+  const det=[...works,...pauses].sort((a,b)=>a.start-b.start).map(i=>{const w=i.type===WORK;
+    return[XD(i.start),dayName(i.start),w?'Работа':i.inWork?'Пауза во работа':'Пауза',loc(i),XT(i.start),XT(i.end),XH(i.gross),w?XH(i.pauseIn):'',w?XH(i.dur):'']});
+
+  const sheets=[
+    {name:'Збир по ден',title:'Работно време – збир по ден',note:period,
+     head:['Датум','Ден','Почеток смена','Крај смена','Вкупно смена','Нето работа','Пауза','Возење / слободно','Локации','Делови работа'],
+     rows:dayRows,total:['ВКУПНО',`${dl.length} ден/а`,'','',XHT(sum(dl,'total')),XHT(sum(dl,'work')),XHT(sum(dl,'pause')),XHT(sum(dl,'free')),new Set(works.map(loc)).size,works.length],
+     widths:[12,13,14,12,14,13,10,18,10,14]},
+    {name:'По ден и локација',title:'Работа по ден и локација',note:'Нето работа = траење на работата минус паузите направени за време на таа работа.',
+     head:['Датум','Ден','Град / објект','Од','До','Делови','Бруто','Одземена пауза','Нето работа'],
+     rows:dlRows,total:['ВКУПНО','','','','',works.length,XHT(sum(works,'gross')),XHT(sum(works,'pauseIn')),XHT(sum(works,'dur'))],
+     widths:[12,13,30,8,8,9,10,16,13]},
+    {name:'По локација',title:'Збир по локација',note:period,
+     head:['Град / објект','Денови','Делови','Бруто','Одземена пауза','Нето работа','Просек нето по ден'],
+     rows:lRows,total:['ВКУПНО',new Set(works.map(w=>dateKey(w.start))).size,works.length,XHT(sum(works,'gross')),XHT(sum(works,'pauseIn')),XHT(sum(works,'dur')),''],
+     widths:[30,9,9,10,16,13,19]},
+    {name:'Детали',title:'Детали – сите делови и паузи',note:'Паузите во работа се веќе одземени од нето работата на соодветниот дел.',
+     head:['Датум','Ден','Тип','Град / објект','Почеток','Крај','Траење','Одземена пауза','Нето работа'],
+     rows:det,widths:[12,13,17,30,9,9,10,16,13]}
+  ];
+  downloadBlob(buildXlsx(sheets),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',name);
+  toast('Excel извештајот е симнат.');
+}
+$('xlsDay').addEventListener('click',()=>{
+  if(!daySel)return toast('Нема зачуван ден за симнување.','warn');
+  downloadArchive(d=>dateKey(d)===daySel,`Rabotno_vreme_${daySel}.xlsx`,'овој ден');
+});
+$('xlsMonth').addEventListener('click',()=>{
+  const from=periodStart('month'),n=new Date();
+  downloadArchive(d=>d>=from,`Rabotno_vreme_${n.getFullYear()}-${pad(n.getMonth()+1)}.xlsx`,'овој месец');
+});
+$('xlsAll').addEventListener('click',()=>{
+  if(!db.events.length)return toast('Сè уште нема податоци за архивирање.','warn');
+  downloadArchive(()=>true,`Arhiva_rabotno_vreme_${dateKey(new Date())}.xlsx`,'архивата');
+});
+
+/* ---------- Backup ---------- */
+$('backupOut').addEventListener('click',()=>{
+  if(!db.events.length)return toast('Нема податоци за зачувување.','warn');
+  downloadBlob([JSON.stringify({app:'rabotno-vreme',version:1,exported:new Date().toISOString(),...db},null,1)],'application/json',`Rabotno_vreme_kopija_${dateKey(new Date())}.json`);
+  toast('Копијата е зачувана.');
+});
+$('backupIn').addEventListener('click',()=>$('backupFile').click());
+$('backupFile').addEventListener('change',async ev=>{
+  const f=ev.target.files[0];ev.target.value='';if(!f)return;
+  try{
+    const p=JSON.parse(await f.text());
+    const incoming=Array.isArray(p)?p:p&&Array.isArray(p.events)?p.events:null;
+    if(!incoming)throw new Error();
+    const key=e=>String(e.id)+'|'+e.at+'|'+e.type;
+    const have=new Set(db.events.map(key));
+    const fresh=incoming.filter(e=>e&&e.type&&TYPES[e.type]&&!have.has(key(e)));
+    if(!fresh.length)return toast('Сите настани од копијата веќе постојат.','warn');
+    if(!confirm(`Ќе се додадат ${fresh.length} нови настани од копијата. Постоечките податоци остануваат. Продолжи?`))return;
+    db.events.push(...fresh);saveData();render();toast(`Вратени ${fresh.length} настани.`);
+  }catch(e){toast('Датотеката не е валидна копија од оваа апликација.','err')}
+});
+
+/* ---------- Init ---------- */
+try{$('place').value=localStorage.getItem(DRAFT_KEY)||''}catch(e){}
+if(!$('place').value){const lw=lastOf('WORK_START');if(lw&&currentSessionState().work)$('place').value=lw.place}
+render();updateClock();
+if(loadFailed)toast('Не можам да ги прочитам зачуваните податоци.','err');
+setInterval(updateClock,1000);
+setInterval(render,30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});
+</script>
+</body>
+</html>
