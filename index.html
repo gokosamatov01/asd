@@ -833,63 +833,182 @@ function buildXlsx(sheets){
   return zipStore(files);
 }
 
+
 function downloadArchive(pred,name,label){
   const r=calculate();
   const shifts=r.shifts.filter(s=>pred(s.start));
   const works=r.intervals.filter(i=>i.type===WORK&&pred(i.start)).sort((a,b)=>a.start-b.start);
   const pauses=r.intervals.filter(i=>i.type===PAUSE&&pred(i.start));
-  if(!shifts.length&&!works.length)return toast('Нема податоци за '+label+'.','warn');
+  const events=db.events
+    .filter(e=>e&&e.at&&pred(new Date(e.at)))
+    .sort((a,b)=>new Date(a.at)-new Date(b.at));
+
+  if(!shifts.length&&!works.length&&!events.length)
+    return toast('Нема податоци за '+label+'.','warn');
+
   const loc=i=>i.place||'Без објект';
   const sum=(arr,k)=>arr.reduce((n,x)=>n+x[k],0);
-  const period=(()=>{const ds=[...shifts.map(s=>s.start),...works.map(w=>w.start)].sort((a,b)=>a-b);return ds.length?`Период: ${dateText(ds[0])} – ${dateText(ds[ds.length-1])} · Извештајот е креиран ${dateText(new Date())} во ${timeText(new Date())}`:''})();
+
+  const period=(()=>{
+    const ds=[...shifts.map(s=>s.start),...works.map(w=>w.start)].sort((a,b)=>a-b);
+    return ds.length
+      ?`Период: ${dateText(ds[0])} – ${dateText(ds[ds.length-1])} · Извештајот е креиран ${dateText(new Date())} во ${timeText(new Date())}`
+      :'';
+  })();
 
   /* 1. По ден */
   const days={};
-  for(const s of shifts){const k=dateKey(s.start);(days[k]=days[k]||{date:s.start,start:s.start,end:null,open:false,total:0,work:0,pause:0,free:0,shifts:0});
-    const d=days[k];d.start=s.start<d.start?s.start:d.start;const e=s.end||new Date();d.end=!d.end||e>d.end?e:d.end;d.open=d.open||s.open;
-    d.total+=s.total;d.work+=s.work;d.pause+=s.pause;d.free+=s.free;d.shifts++;}
-  const dayRows=Object.keys(days).sort().map(k=>{const d=days[k];
+  for(const s of shifts){
+    const k=dateKey(s.start);
+    (days[k]=days[k]||{date:s.start,start:s.start,end:null,open:false,total:0,work:0,pause:0,free:0,shifts:0});
+    const d=days[k];
+    d.start=s.start<d.start?s.start:d.start;
+    const e=s.end||new Date();
+    d.end=!d.end||e>d.end?e:d.end;
+    d.open=d.open||s.open;
+    d.total+=s.total;
+    d.work+=s.work;
+    d.pause+=s.pause;
+    d.free+=s.free;
+    d.shifts++;
+  }
+
+  const dayRows=Object.keys(days).sort().map(k=>{
+    const d=days[k];
     const locs=new Set(works.filter(w=>dateKey(w.start)===k).map(loc));
-    return[XD(d.date),dayName(d.date),XT(d.start),d.open?'во тек':XT(d.end),XH(d.total),XH(d.work),XH(d.pause),XH(d.free),locs.size,works.filter(w=>dateKey(w.start)===k).length]});
+    return[
+      XD(d.date),dayName(d.date),XT(d.start),d.open?'во тек':XT(d.end),
+      XH(d.total),XH(d.work),XH(d.pause),XH(d.free),
+      locs.size,works.filter(w=>dateKey(w.start)===k).length
+    ];
+  });
   const dl=Object.values(days);
 
   /* 2. По ден и локација */
   const dlMap={};
-  for(const w of works){const k=dateKey(w.start)+'|'+loc(w);(dlMap[k]=dlMap[k]||{date:w.start,place:loc(w),first:w.start,last:w.end,parts:0,gross:0,pause:0,net:0});
-    const x=dlMap[k];x.last=w.end>x.last?w.end:x.last;x.parts++;x.gross+=w.gross;x.pause+=w.pauseIn;x.net+=w.dur;}
-  const dlRows=Object.values(dlMap).sort((a,b)=>a.first-b.first).map(x=>[XD(x.date),dayName(x.date),x.place,XT(x.first),XT(x.last),x.parts,XH(x.gross),XH(x.pause),XH(x.net)]);
+  for(const w of works){
+    const k=dateKey(w.start)+'|'+loc(w);
+    (dlMap[k]=dlMap[k]||{date:w.start,place:loc(w),first:w.start,last:w.end,parts:0,gross:0,pause:0,net:0});
+    const x=dlMap[k];
+    x.last=w.end>x.last?w.end:x.last;
+    x.parts++;
+    x.gross+=w.gross;
+    x.pause+=w.pauseIn;
+    x.net+=w.dur;
+  }
+
+  const dlRows=Object.values(dlMap).sort((a,b)=>a.first-b.first).map(x=>[
+    XD(x.date),dayName(x.date),x.place,XT(x.first),XT(x.last),
+    x.parts,XH(x.gross),XH(x.pause),XH(x.net)
+  ]);
 
   /* 3. По локација */
   const lMap={};
-  for(const w of works){const k=loc(w);(lMap[k]=lMap[k]||{place:k,days:new Set(),parts:0,gross:0,pause:0,net:0});
-    const x=lMap[k];x.days.add(dateKey(w.start));x.parts++;x.gross+=w.gross;x.pause+=w.pauseIn;x.net+=w.dur;}
+  for(const w of works){
+    const k=loc(w);
+    (lMap[k]=lMap[k]||{place:k,days:new Set(),parts:0,gross:0,pause:0,net:0});
+    const x=lMap[k];
+    x.days.add(dateKey(w.start));
+    x.parts++;
+    x.gross+=w.gross;
+    x.pause+=w.pauseIn;
+    x.net+=w.dur;
+  }
+
   const lList=Object.values(lMap).sort((a,b)=>b.net-a.net);
-  const lRows=lList.map(x=>[x.place,x.days.size,x.parts,XH(x.gross),XH(x.pause),XH(x.net),XH(x.net/x.days.size)]);
+  const lRows=lList.map(x=>[
+    x.place,x.days.size,x.parts,XH(x.gross),XH(x.pause),
+    XH(x.net),XH(x.net/x.days.size)
+  ]);
 
   /* 4. Детали */
-  const det=[...works,...pauses].sort((a,b)=>a.start-b.start).map(i=>{const w=i.type===WORK;
-    return[XD(i.start),dayName(i.start),w?'Работа':i.inWork?'Пауза во работа':'Пауза',loc(i),XT(i.start),XT(i.end),XH(i.gross),w?XH(i.pauseIn):'',w?XH(i.dur):'']});
+  const det=[...works,...pauses].sort((a,b)=>a.start-b.start).map(i=>{
+    const w=i.type===WORK;
+    return[
+      XD(i.start),dayName(i.start),
+      w?'Работа':i.inWork?'Пауза во работа':'Пауза',
+      loc(i),XT(i.start),XT(i.end),XH(i.gross),
+      w?XH(i.pauseIn):'',w?XH(i.dur):''
+    ];
+  });
+
+  /* 5. Хронологија – вистински зачувани настани */
+  const eventNames={
+    SHIFT_START:'Почеток смена',
+    SHIFT_END:'Крај смена',
+    WORK_START:'Почеток активна работа',
+    WORK_END:'Крај активна работа',
+    PAUSE_START:'Почеток пауза',
+    PAUSE_END:'Крај пауза'
+  };
+
+  const eventRows=events.map(e=>{
+    const d=new Date(e.at);
+    return[
+      XD(d),
+      dayName(d),
+      XT(d),
+      eventNames[e.type]||e.type,
+      e.place||'',
+      e.resumeWork?'Да':''
+    ];
+  });
 
   const sheets=[
-    {name:'Збир по ден',title:'Работно време – збир по ден',note:period,
-     head:['Датум','Ден','Почеток смена','Крај смена','Вкупно смена','Нето работа','Пауза','Возење / слободно','Локации','Делови работа'],
-     rows:dayRows,total:['ВКУПНО',`${dl.length} ден/а`,'','',XHT(sum(dl,'total')),XHT(sum(dl,'work')),XHT(sum(dl,'pause')),XHT(sum(dl,'free')),new Set(works.map(loc)).size,works.length],
-     widths:[12,13,14,12,14,13,10,18,10,14]},
-    {name:'По ден и локација',title:'Работа по ден и локација',note:'Нето работа = траење на работата минус паузите направени за време на таа работа.',
-     head:['Датум','Ден','Град / објект','Од','До','Делови','Бруто','Одземена пауза','Нето работа'],
-     rows:dlRows,total:['ВКУПНО','','','','',works.length,XHT(sum(works,'gross')),XHT(sum(works,'pauseIn')),XHT(sum(works,'dur'))],
-     widths:[12,13,30,8,8,9,10,16,13]},
-    {name:'По локација',title:'Збир по локација',note:period,
-     head:['Град / објект','Денови','Делови','Бруто','Одземена пауза','Нето работа','Просек нето по ден'],
-     rows:lRows,total:['ВКУПНО',new Set(works.map(w=>dateKey(w.start))).size,works.length,XHT(sum(works,'gross')),XHT(sum(works,'pauseIn')),XHT(sum(works,'dur')),''],
-     widths:[30,9,9,10,16,13,19]},
-    {name:'Детали',title:'Детали – сите делови и паузи',note:'Паузите во работа се веќе одземени од нето работата на соодветниот дел.',
-     head:['Датум','Ден','Тип','Град / објект','Почеток','Крај','Траење','Одземена пауза','Нето работа'],
-     rows:det,widths:[12,13,17,30,9,9,10,16,13]}
+    {
+      name:'Збир по ден',
+      title:'Работно време – збир по ден',
+      note:period,
+      head:['Датум','Ден','Почеток смена','Крај смена','Вкупно смена','Нето работа','Пауза','Возење / слободно','Локации','Делови работа'],
+      rows:dayRows,
+      total:['ВКУПНО',`${dl.length} ден/а`,'','',XHT(sum(dl,'total')),XHT(sum(dl,'work')),XHT(sum(dl,'pause')),XHT(sum(dl,'free')),new Set(works.map(loc)).size,works.length],
+      widths:[12,13,14,12,14,13,10,18,10,14]
+    },
+    {
+      name:'По ден и локација',
+      title:'Работа по ден и локација',
+      note:'Нето работа = траење на работата минус паузите направени за време на таа работа.',
+      head:['Датум','Ден','Град / објект','Од','До','Делови','Бруто','Одземена пауза','Нето работа'],
+      rows:dlRows,
+      total:['ВКУПНО','','','','',works.length,XHT(sum(works,'gross')),XHT(sum(works,'pauseIn')),XHT(sum(works,'dur'))],
+      widths:[12,13,30,8,8,9,10,16,13]
+    },
+    {
+      name:'По локација',
+      title:'Збир по локација',
+      note:period,
+      head:['Град / објект','Денови','Делови','Бруто','Одземена пауза','Нето работа','Просек нето по ден'],
+      rows:lRows,
+      total:['ВКУПНО',new Set(works.map(w=>dateKey(w.start))).size,works.length,XHT(sum(works,'gross')),XHT(sum(works,'pauseIn')),XHT(sum(works,'dur')),''],
+      widths:[30,9,9,10,16,13,19]
+    },
+    {
+      name:'Детали',
+      title:'Детали – сите делови и паузи',
+      note:'Паузите во работа се веќе одземени од нето работата на соодветниот дел.',
+      head:['Датум','Ден','Тип','Град / објект','Почеток','Крај','Траење','Одземена пауза','Нето работа'],
+      rows:det,
+      widths:[12,13,17,30,9,9,10,16,13]
+    },
+    {
+      name:'Хронологија',
+      title:'Хронологија – сите настани',
+      note:'Сите зачувани настани подредени по датум и час.',
+      head:['Датум','Ден','Час','Настан','Град / објект','Продолжена работа'],
+      rows:eventRows,
+      widths:[12,13,12,27,30,18]
+    }
   ];
-  downloadBlob(buildXlsx(sheets),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',name);
+
+  downloadBlob(
+    buildXlsx(sheets),
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    name
+  );
+
   toast('Excel извештајот е симнат.');
 }
+
 $('xlsDay').addEventListener('click',()=>{
   if(!daySel)return toast('Нема зачуван ден за симнување.','warn');
   downloadArchive(d=>dateKey(d)===daySel,`Rabotno_vreme_${daySel}.xlsx`,'овој ден');
