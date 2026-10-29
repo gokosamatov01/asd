@@ -835,7 +835,7 @@ function buildXlsx(sheets){
 
 
 
-function downloadArchive(pred,name,label){
+downloadArchive(pred,name,label){
   const r=calculate();
   const shifts=r.shifts.filter(s=>pred(s.start));
   const works=r.intervals.filter(i=>i.type===WORK&&pred(i.start)).sort((a,b)=>a.start-b.start);
@@ -848,12 +848,12 @@ function downloadArchive(pred,name,label){
     return toast('Нема податоци за '+label+'.','warn');
 
   const loc=i=>i.place||'Без објект';
-  const sum=(arr,k)=>arr.reduce((n,x)=>n+(x[k]||0),0);
+  const sum=(arr,k)=>arr.reduce((n,x)=>n+x[k],0);
 
   const period=(()=>{
     const ds=[...shifts.map(s=>s.start),...works.map(w=>w.start)].sort((a,b)=>a-b);
     return ds.length
-      ?`Период: ${dateText(ds[0])} – ${dateText(ds[ds.length-1])} · Извештајот е креиран ${dateText(new Date())} во ${timeText(new Date())}`
+      ?Период: ${dateText(ds[0])} – ${dateText(ds[ds.length-1])} · Извештајот е креиран ${dateText(new Date())} во ${timeText(new Date())}
       :'';
   })();
 
@@ -922,52 +922,18 @@ function downloadArchive(pred,name,label){
     XH(x.net),XH(x.net/x.days.size)
   ]);
 
-  /* 4. Детали – смени, работа и паузи */
-  const detItems=[
-    ...shifts.map(s=>({
-      start:s.start,
-      end:s.end,
-      type:'Смена',
-      place:'',
-      duration:s.total,
-      pause:'',
-      net:''
-    })),
+  /* 4. Детали */
+  const det=[...works,...pauses].sort((a,b)=>a.start-b.start).map(i=>{
+    const w=i.type===WORK;
+    return[
+      XD(i.start),dayName(i.start),
+      w?'Работа':i.inWork?'Пауза во работа':'Пауза',
+      loc(i),XT(i.start),XT(i.end),XH(i.gross),
+      w?XH(i.pauseIn):'',w?XH(i.dur):''
+    ];
+  });
 
-    ...works.map(w=>({
-      start:w.start,
-      end:w.end,
-      type:'Работа',
-      place:loc(w),
-      duration:w.gross,
-      pause:w.pauseIn,
-      net:w.dur
-    })),
-
-    ...pauses.map(p=>({
-      start:p.start,
-      end:p.end,
-      type:p.inWork?'Пауза во работа':'Пауза',
-      place:loc(p),
-      duration:p.gross,
-      pause:'',
-      net:''
-    }))
-  ].sort((a,b)=>a.start-b.start);
-
-  const det=detItems.map(i=>[
-    XD(i.start),
-    dayName(i.start),
-    i.type,
-    i.place,
-    XT(i.start),
-    i.end?XT(i.end):'во тек',
-    XH(i.duration),
-    i.pause===''?'':XH(i.pause),
-    i.net===''?'':XH(i.net)
-  ]);
-
-  /* 5. Хронологија – сите зачувани настани */
+  /* 5. Хронологија – вистински зачувани настани */
   const eventNames={
     SHIFT_START:'Почеток смена',
     SHIFT_END:'Крај смена',
@@ -976,7 +942,6 @@ function downloadArchive(pred,name,label){
     PAUSE_START:'Почеток пауза',
     PAUSE_END:'Крај пауза'
   };
-
   const eventRows=events.map(e=>{
     const d=new Date(e.at);
     return[
