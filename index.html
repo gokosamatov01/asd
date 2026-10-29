@@ -866,9 +866,37 @@ function downloadArchive(pred,name,label){
   const lList=Object.values(lMap).sort((a,b)=>b.net-a.net);
   const lRows=lList.map(x=>[x.place,x.days.size,x.parts,XH(x.gross),XH(x.pause),XH(x.net),XH(x.net/x.days.size)]);
 
-  /* 4. Детали */
-  const det=[...works,...pauses].sort((a,b)=>a.start-b.start).map(i=>{const w=i.type===WORK;
-    return[XD(i.start),dayName(i.start),w?'Работа':i.inWork?'Пауза во работа':'Пауза',loc(i),XT(i.start),XT(i.end),XH(i.gross),w?XH(i.pauseIn):'',w?XH(i.dur):'']});
+  /* 4. Детали – смени, работа и паузи */
+  const det=[
+    ...shifts.map(s=>({
+      start:s.start,
+      end:s.end,
+      type:'SHIFT_DETAIL',
+      place:'',
+      gross:s.total,
+      pauseIn:'',
+      dur:''
+    })),
+    ...works,
+    ...pauses
+  ]
+  .sort((a,b)=>a.start-b.start)
+  .map(i=>{
+    const shift=i.type==='SHIFT_DETAIL';
+    const w=i.type===WORK;
+
+    return[
+      XD(i.start),
+      dayName(i.start),
+      shift?'Смена':w?'Работа':i.inWork?'Пауза во работа':'Пауза',
+      shift?'':loc(i),
+      XT(i.start),
+      i.end?XT(i.end):'во тек',
+      XH(shift?i.gross:i.gross),
+      shift?'':w?XH(i.pauseIn):'',
+      shift?'':w?XH(i.dur):''
+    ];
+  });
 
   const sheets=[
     {name:'Збир по ден',title:'Работно време – збир по ден',note:period,
