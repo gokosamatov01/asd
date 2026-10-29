@@ -834,6 +834,7 @@ function buildXlsx(sheets){
 }
 
 
+
 function downloadArchive(pred,name,label){
   const r=calculate();
   const shifts=r.shifts.filter(s=>pred(s.start));
@@ -847,7 +848,7 @@ function downloadArchive(pred,name,label){
     return toast('Нема податоци за '+label+'.','warn');
 
   const loc=i=>i.place||'Без објект';
-  const sum=(arr,k)=>arr.reduce((n,x)=>n+x[k],0);
+  const sum=(arr,k)=>arr.reduce((n,x)=>n+(x[k]||0),0);
 
   const period=(()=>{
     const ds=[...shifts.map(s=>s.start),...works.map(w=>w.start)].sort((a,b)=>a-b);
@@ -921,18 +922,52 @@ function downloadArchive(pred,name,label){
     XH(x.net),XH(x.net/x.days.size)
   ]);
 
-  /* 4. Детали */
-  const det=[...works,...pauses].sort((a,b)=>a.start-b.start).map(i=>{
-    const w=i.type===WORK;
-    return[
-      XD(i.start),dayName(i.start),
-      w?'Работа':i.inWork?'Пауза во работа':'Пауза',
-      loc(i),XT(i.start),XT(i.end),XH(i.gross),
-      w?XH(i.pauseIn):'',w?XH(i.dur):''
-    ];
-  });
+  /* 4. Детали – смени, работа и паузи */
+  const detItems=[
+    ...shifts.map(s=>({
+      start:s.start,
+      end:s.end,
+      type:'Смена',
+      place:'',
+      duration:s.total,
+      pause:'',
+      net:''
+    })),
 
-  /* 5. Хронологија – вистински зачувани настани */
+    ...works.map(w=>({
+      start:w.start,
+      end:w.end,
+      type:'Работа',
+      place:loc(w),
+      duration:w.gross,
+      pause:w.pauseIn,
+      net:w.dur
+    })),
+
+    ...pauses.map(p=>({
+      start:p.start,
+      end:p.end,
+      type:p.inWork?'Пауза во работа':'Пауза',
+      place:loc(p),
+      duration:p.gross,
+      pause:'',
+      net:''
+    }))
+  ].sort((a,b)=>a.start-b.start);
+
+  const det=detItems.map(i=>[
+    XD(i.start),
+    dayName(i.start),
+    i.type,
+    i.place,
+    XT(i.start),
+    i.end?XT(i.end):'во тек',
+    XH(i.duration),
+    i.pause===''?'':XH(i.pause),
+    i.net===''?'':XH(i.net)
+  ]);
+
+  /* 5. Хронологија – сите зачувани настани */
   const eventNames={
     SHIFT_START:'Почеток смена',
     SHIFT_END:'Крај смена',
@@ -941,6 +976,73 @@ function downloadArchive(pred,name,label){
     PAUSE_START:'Почеток пауза',
     PAUSE_END:'Крај пауза'
   };
+
+  const eventRows=events.map(e=>{
+    const d=new Date(e.at);
+    return[
+      XD(d),
+      dayName(d),
+      XT(d),
+      eventNames[e.type]||e.type,
+      e.place||'',
+      e.resumeWork?'Да':''
+    ];
+  });
+
+  const sheets=[
+    {
+      name:'Збир по ден',
+      title:'Работно време – збир по ден',
+      note:period,
+      head:['Датум','Ден','Почеток смена','Крај смена','Вкупно смена','Нето работа','Пауза','Возење / слободно','Локации','Делови работа'],
+      rows:dayRows,
+      total:['ВКУПНО',`${dl.length} ден/а`,'','',XHT(sum(dl,'total')),XHT(sum(dl,'work')),XHT(sum(dl,'pause')),XHT(sum(dl,'free')),new Set(works.map(loc)).size,works.length],
+      widths:[12,13,14,12,14,13,10,18,10,14]
+    },
+    {
+      name:'По ден и локација',
+      title:'Работа по ден и локација',
+      note:'Нето работа = траење на работата минус паузите направени за време на таа работа.',
+      head:['Датум','Ден','Град / објект','Од','До','Делови','Бруто','Одземена пауза','Нето работа'],
+      rows:dlRows,
+      total:['ВКУПНО','','','','',works.length,XHT(sum(works,'gross')),XHT(sum(works,'pauseIn')),XHT(sum(works,'dur'))],
+      widths:[12,13,30,8,8,9,10,16,13]
+    },
+    {
+      name:'По локација',
+      title:'Збир по локација',
+      note:period,
+      head:['Град / објект','Денови','Делови','Бруто','Одземена пауза','Нето работа','Просек нето по ден'],
+      rows:lRows,
+      total:['ВКУПНО',new Set(works.map(w=>dateKey(w.start))).size,works.length,XHT(sum(works,'gross')),XHT(sum(works,'pauseIn')),XHT(sum(works,'dur')),''],
+      widths:[30,9,9,10,16,13,19]
+    },
+    {
+      name:'Детали',
+      title:'Детали – смени, работа и паузи',
+      note:'Смена ги прикажува почетокот и крајот на смената. Работа ги прикажува деловите активна работа и одземените паузи.',
+      head:['Датум','Ден','Тип','Град / објект','Почеток','Крај','Траење','Одземена пауза','Нето работа'],
+      rows:det,
+      widths:[12,13,17,30,9,9,10,16,13]
+    },
+    {
+      name:'Хронологија',
+      title:'Хронологија – сите настани',
+      note:'Сите зачувани настани подредени според датум и час.',
+      head:['Датум','Ден','Час','Настан','Град / објект','Продолжена работа'],
+      rows:eventRows,
+      widths:[12,13,12,27,30,18]
+    }
+  ];
+
+  downloadBlob(
+    buildXlsx(sheets),
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    name
+  );
+
+  toast('Excel извештајот е симнат.');
+}
 
   const eventRows=events.map(e=>{
     const d=new Date(e.at);
