@@ -231,6 +231,7 @@ tr:last-child td{border-bottom:0}
     <div class="now">
       <div class="t tnum" id="clockTime">00:00:00</div>
       <div class="d" id="clockDate"></div>
+      <button class="btn" id="authBtn" style="display:none;min-height:30px;padding:4px 10px;font-size:12px;margin-top:6px"></button>
     </div>
   </header>
 
@@ -378,6 +379,8 @@ tr:last-child td{border-bottom:0}
         <p class="muted">Excel датотека со четири листови: збир по ден, по ден и локација, по локација и детали за секој дел.</p>
         <div class="btn-row">
           <button class="btn primary" id="xlsDay"><svg class="i"><use href="#i-download"/></svg>Избраниот ден</button>
+          <button class="btn" id="xlsLastWeek"><svg class="i"><use href="#i-download"/></svg>Минатата недела</button>
+          <button class="btn" id="xlsWeek"><svg class="i"><use href="#i-download"/></svg>Оваа недела</button>
           <button class="btn" id="xlsMonth"><svg class="i"><use href="#i-download"/></svg>Овој месец</button>
           <button class="btn" id="xlsAll"><svg class="i"><use href="#i-download"/></svg>Сите денови</button>
         </div>
@@ -399,7 +402,8 @@ tr:last-child td{border-bottom:0}
 
 <script>
 const STORAGE_KEY='rv_app_v1';
-const DRAFT_KEY='rv_place_draft';
+const BACKUP_KEY='rv_last_backup';
+let syncHook=null; // set by the Firebase module below; null = local-only
 const TYPES={
   SHIFT_START:'Почеток на смена',
   SHIFT_END:'Крај на смена',
@@ -441,6 +445,7 @@ let db=loadData();
 function saveData(){
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
   catch(e){toast('Податоците не можат да се зачуваат во овој прелистувач.','err')}
+  if(syncHook)syncHook();
 }
 
 /* ---------- Events ---------- */
@@ -485,6 +490,7 @@ const actions={
     const last=lastOf('WORK_START'),t=Date.now();
     if(s.pause){const ps=lastOf('PAUSE_START');addEvent('PAUSE_END',ps?ps.place:'',new Date(t).toISOString())}
     addEvent('WORK_END',last?last.place:'',new Date(t+1).toISOString());
+    $('place').value='';
     toast('Делот на '+(last&&last.place?last.place:'објектот')+' е завршен: '+duration(lastPart&&lastPart().dur||0)+' нето.');
   },
   startPause(){
@@ -506,7 +512,7 @@ const actions={
     const st=currentSessionState();
     if(!st.shift)return toast('Нема активна смена.','warn');
     if(!confirm('Дали сигурно сакаш да ја завршиш смената?'))return;
-    addEvent('SHIFT_END');toast('Смената е завршена. Добредојде дома!');
+    addEvent('SHIFT_END');$('place').value='';toast('Смената е завршена. Добредојде дома!');
   }
 };
 document.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>{buzz();actions[b.dataset.act]();render()}));
@@ -665,10 +671,9 @@ function renderRecent(){
 }
 $('recentPlaces').addEventListener('click',e=>{
   const c=e.target.closest('.chip');if(!c)return;
-  $('place').value=c.dataset.place;saveDraft();renderRecent();
+  $('place').value=c.dataset.place;renderRecent();
 });
-function saveDraft(){try{localStorage.setItem(DRAFT_KEY,$('place').value)}catch(e){}}
-$('place').addEventListener('input',()=>{saveDraft();renderRecent()});
+$('place').addEventListener('input',renderRecent);
 
 function periodStart(p){
   const n=new Date(),s=new Date(n.getFullYear(),n.getMonth(),n.getDate());
@@ -922,6 +927,14 @@ $('xlsDay').addEventListener('click',()=>{
   if(!daySel)return toast('Нема зачуван ден за симнување.','warn');
   downloadArchive(d=>dateKey(d)===daySel,`Rabotno_vreme_${daySel}.xlsx`,'овој ден');
 });
+function weekExport(offset){
+  const from=periodStart('week');from.setDate(from.getDate()+offset*7);
+  const to=new Date(from);to.setDate(to.getDate()+7);
+  const last=new Date(to-1);
+  downloadArchive(d=>d>=from&&d<to,`Rabotno_vreme_${dateKey(from)}_do_${dateKey(last)}.xlsx`,offset?'минатата недела':'оваа недела');
+}
+$('xlsLastWeek').addEventListener('click',()=>weekExport(-1));
+$('xlsWeek').addEventListener('click',()=>weekExport(0));
 $('xlsMonth').addEventListener('click',()=>{
   const from=periodStart('month'),n=new Date();
   downloadArchive(d=>d>=from,`Rabotno_vreme_${n.getFullYear()}-${pad(n.getMonth()+1)}.xlsx`,'овој месец');
@@ -935,6 +948,7 @@ $('xlsAll').addEventListener('click',()=>{
 $('backupOut').addEventListener('click',()=>{
   if(!db.events.length)return toast('Нема податоци за зачувување.','warn');
   downloadBlob([JSON.stringify({app:'rabotno-vreme',version:1,exported:new Date().toISOString(),...db},null,1)],'application/json',`Rabotno_vreme_kopija_${dateKey(new Date())}.json`);
+  try{localStorage.setItem(BACKUP_KEY,String(Date.now()))}catch(e){}
   toast('Копијата е зачувана.');
 });
 $('backupIn').addEventListener('click',()=>$('backupFile').click());
@@ -954,13 +968,76 @@ $('backupFile').addEventListener('change',async ev=>{
 });
 
 /* ---------- Init ---------- */
-try{$('place').value=localStorage.getItem(DRAFT_KEY)||''}catch(e){}
-if(!$('place').value){const lw=lastOf('WORK_START');if(lw&&currentSessionState().work)$('place').value=lw.place}
 render();updateClock();
 if(loadFailed)toast('Не можам да ги прочитам зачуваните податоци.','err');
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+try{
+  const last=+localStorage.getItem(BACKUP_KEY)||0;
+  if(db.events.length&&Date.now()-last>7*864e5)toast('Помина повеќе од 7 дена од последната резервна копија. Зачувај копија.','warn');
+}catch(e){}
 setInterval(updateClock,1000);
 setInterval(render,30000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});
+</script>
+<script type="module">
+/* ---------- Firebase sync: one Firestore doc per event at users/{uid}/events/{id} ---------- */
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const app=initializeApp({
+  apiKey:"AIzaSyB5FJeHl3QGmn18phQAEc030itiP7keuaw",
+  authDomain:"workingtimedb.firebaseapp.com",
+  projectId:"workingtimedb",
+  storageBucket:"workingtimedb.firebasestorage.app",
+  messagingSenderId:"822712959627",
+  appId:"1:822712959627:web:6f07b97f814249891eca8e"
+});
+const auth=getAuth(app);
+const fs=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
+const btn=$('authBtn');
+let col=null,unsub=null,remote=new Map(),first=true;
+const fail=()=>toast('Синхронизацијата не успеа.','err');
+
+// Diff db.events against what Firestore already has; write only what changed.
+syncHook=()=>{
+  if(!col)return;
+  const ids=new Set();
+  for(const e of db.events){
+    const id=String(e.id),j=JSON.stringify(e);ids.add(id);
+    if(remote.get(id)!==j){remote.set(id,j);setDoc(doc(col,id),JSON.parse(j)).catch(fail)}
+  }
+  for(const id of [...remote.keys()])if(!ids.has(id)){remote.delete(id);deleteDoc(doc(col,id)).catch(fail)}
+};
+
+function listen(){
+  unsub=onSnapshot(col,snap=>{
+    const incoming=snap.docs.map(d=>d.data());
+    remote=new Map(incoming.map(e=>[String(e.id),JSON.stringify(e)]));
+    if(first){ // first load: keep events that exist only on this device, they get uploaded below
+      first=false;
+      const have=new Set(remote.keys());
+      db.events=[...incoming,...db.events.filter(e=>!have.has(String(e.id)))];
+      syncHook();
+    }else db.events=incoming;
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}catch(e){}
+    render();
+  },fail);
+}
+
+onAuthStateChanged(auth,u=>{
+  if(unsub)unsub();
+  unsub=null;col=null;remote=new Map();first=true;
+  btn.style.display='';
+  if(!u){btn.textContent='Најави се со Google';return}
+  btn.textContent='Одјави ('+u.email+')';
+  col=collection(fs,'users',u.uid,'events');
+  listen();
+});
+btn.addEventListener('click',()=>{
+  if(auth.currentUser)signOut(auth);
+  else signInWithPopup(auth,new GoogleAuthProvider()).catch(()=>toast('Најавата не успеа.','err'));
+});
 </script>
 </body>
 </html>
