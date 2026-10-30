@@ -38,10 +38,7 @@ button,input,select{font:inherit;color:inherit}
 
 /* Header */
 .top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
-.brand{display:flex;align-items:center;gap:12px;min-width:0}
-.mark{width:44px;height:44px;border-radius:13px;background:var(--ink);color:var(--bg);display:grid;place-items:center;flex:none}
-.brand h1{font-size:21px;font-weight:700;margin:0;letter-spacing:-.01em}
-.brand p{margin:0;color:var(--muted);font-size:13px}
+.logo{height:48px;width:auto;max-width:100%;flex:none}
 .now{text-align:right;line-height:1.2}
 .now .t{font-size:22px;font-weight:600}
 .now .d{font-size:13px;color:var(--muted)}
@@ -51,23 +48,19 @@ button,input,select{font:inherit;color:inherit}
 .card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 .card-head h2{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:600;margin:0}
 .card-head h2 .i{color:var(--muted)}
-.grid-2{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;align-items:start}
-.grid-2>.card{margin-bottom:0}
-.stack{display:grid;gap:14px;margin-bottom:14px}
 
 /* Hero */
 .hero{--c:var(--muted);--cbg:var(--surface-2);position:relative;overflow:hidden}
 .hero[data-state="drive"]{--c:var(--drive);--cbg:var(--drive-bg)}
 .hero[data-state="work"]{--c:var(--work);--cbg:var(--work-bg)}
 .hero[data-state="pause"]{--c:var(--pause);--cbg:var(--pause-bg)}
-.hero::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--c)}
-.state{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.state{display:flex;align-items:center;gap:14px}
 .state-ic{width:52px;height:52px;border-radius:15px;background:var(--cbg);color:var(--c);display:grid;place-items:center;flex:none;transition:background .3s,color .3s}
 .state-txt{min-width:0}
 .state-title{font-size:18px;font-weight:600;margin:0}
 .state-sub{color:var(--muted);font-size:14px;margin:0;overflow-wrap:anywhere}
 .timer{margin-left:auto;text-align:right}
-.timer b{display:block;font-size:clamp(30px,7vw,46px);font-weight:600;line-height:1;letter-spacing:-.02em;color:var(--c)}
+.timer b{display:block;font-size:clamp(34px,8vw,56px);font-weight:600;line-height:1;letter-spacing:-.02em;color:var(--c)}
 .timer small{color:var(--muted);font-size:12px}
 .pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px;vertical-align:middle}
 .hero[data-state="work"] .pulse,.hero[data-state="pause"] .pulse,.hero[data-state="drive"] .pulse{animation:pulse 1.8s ease-in-out infinite}
@@ -76,7 +69,7 @@ button,input,select{font:inherit;color:inherit}
 label.lbl{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
 .input-ic{position:relative}
 .input-ic .i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
-input[type=text],input[type=datetime-local],select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface);min-height:44px}
+input[type=text],input[type=date],input[type=datetime-local],select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface);min-height:44px}
 .input-ic input{padding-left:40px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 0}
 .chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 11px 5px 8px;font-size:13px;cursor:pointer;max-width:100%}
@@ -164,9 +157,6 @@ tr:last-child td{border-bottom:0}
 .btn.primary:hover{opacity:.9}
 .btn-row{display:flex;flex-wrap:wrap;gap:8px}
 .muted{color:var(--muted);font-size:13px;max-width:70ch}
-.export-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.export-grid h3{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;margin:0 0 6px}
-.export-grid h3 .i{color:var(--muted)}
 
 /* Toast */
 .toast-wrap{position:fixed;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:grid;justify-items:center;gap:8px;pointer-events:none;z-index:50;padding:0 12px}
@@ -175,7 +165,6 @@ tr:last-child td{border-bottom:0}
 @keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-@media (max-width:860px){.grid-2{grid-template-columns:1fr}.export-grid{grid-template-columns:1fr}}
 @media (max-width:640px){
   main{padding:12px 10px 32px}
   .card{padding:15px;border-radius:15px}
@@ -183,10 +172,80 @@ tr:last-child td{border-bottom:0}
   .state{flex-wrap:wrap}
   .timer{margin-left:0;text-align:left;width:100%}
   .now .t{font-size:18px}
-  .brand h1{font-size:18px}
-  .mark{width:38px;height:38px}
+  .logo{height:34px}
   .add-row{grid-template-columns:1fr}
   .day-pick select{min-width:0}
+}
+
+/* ---- Layout v2: views, nav, hero band, donut, week chart ---- */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.view{animation:vin .22s ease-out}
+@keyframes vin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.cols{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;align-items:stretch;margin-bottom:14px}
+.cols.even{grid-template-columns:1fr 1fr}
+.cols>.card{margin-bottom:0;display:flex;flex-direction:column}
+.cols>.card>.stats,.cols>.card>.shift-grid,.cols>.card>.week{flex:1}
+
+.nav{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:5px;margin-bottom:16px;position:sticky;top:8px;z-index:20;box-shadow:0 2px 12px rgba(20,33,61,.07)}
+.nav button{display:flex;align-items:center;justify-content:center;gap:8px;border:0;background:transparent;border-radius:12px;padding:10px;cursor:pointer;color:var(--muted);font-weight:500}
+.nav button:hover{color:var(--ink)}
+.nav button[aria-current="page"]{background:var(--ink);color:var(--surface)}
+
+.hero{padding:0}
+.hero-body{padding:20px}
+.state{padding:20px;background:var(--cbg);transition:background .3s}
+.state-ic{background:var(--surface)}
+.tile.next{background:var(--cbg)}
+
+.shift-grid{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.donut{width:136px;height:136px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;flex:none}
+.donut-in{width:100px;height:100px;border-radius:50%;background:var(--surface);display:grid;place-content:center;text-align:center}
+.donut-in strong{font-size:22px;font-weight:600;line-height:1.1}
+.donut-in small{color:var(--muted);font-size:12px}
+
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;min-height:190px}
+.wd{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.wd .v{font-size:11px;color:var(--muted);height:14px}
+.wd .tr{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.wd .b{width:100%;max-width:40px;border-radius:8px 8px 4px 4px;background:var(--line)}
+.wd.on .b{background:var(--work)}
+.wd .l{font-size:12px;color:var(--muted)}
+.wd.today .l{color:var(--ink);font-weight:700}
+.wd.today .b{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--work)}
+
+.day-total span{background:var(--surface-2);padding:5px 11px;border-radius:999px}
+.day-pick select{min-width:200px}
+.backup-info{margin:0 0 12px;font-size:13px;color:var(--muted)}
+
+@media (max-width:860px){.cols,.cols.even{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .nav{position:fixed;left:0;right:0;bottom:0;top:auto;margin:0;border-radius:18px 18px 0 0;border-width:1px 0 0;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+  .nav button{flex-direction:column;gap:2px;font-size:11.5px;padding:7px 4px}
+  main{padding-bottom:96px}
+  .toast-wrap{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .hero-body,.state{padding:16px}
+  .shift-grid{grid-template-columns:1fr;justify-items:center}
+  .shift-grid .stats{width:100%}
+  .day-pick{width:100%}
+  .day-pick select{min-width:0;flex:1}
+}
+
+/* ---- Food expenses ---- */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#view-expenses .cols>.card>.stats{flex:none}
+#xTotal{font-size:17px;white-space:nowrap}
+.xcats{display:flex;width:100%}
+.xcats button{flex:1}
+.xn b{color:var(--ink);font-weight:500}
+.xday{margin-bottom:16px}
+.xday:last-child{margin-bottom:0}
+.xday-h{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:2px solid var(--line);font-size:14px}
+.xrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.xp{display:flex;gap:6px;align-items:center;font-weight:500;min-width:0}
+.xn{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:640px){
+  .xrow{grid-template-columns:minmax(0,1fr) auto auto}
+  .xn{grid-column:1/-1;order:3;white-space:normal;margin-top:-6px}
 }
 </style>
 </head>
@@ -216,18 +275,17 @@ tr:last-child td{border-bottom:0}
   <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 4.2 2.6 17.5A2 2 0 0 0 4.3 20.5h15.4a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4.5M12 17.2h.01"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8h.01"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
   <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18h7a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7h7"/></symbol>
 </svg>
 
 <main>
   <header class="top">
-    <div class="brand">
-      <div class="mark"><svg class="i lg"><use href="#i-clock"/></svg></div>
-      <div>
-        <h1>Работно време</h1>
-        <p>Смени, објекти и паузи</p>
-      </div>
-    </div>
+    <picture><source srcset="logo-dark.png" media="(prefers-color-scheme:dark)"><img class="logo" src="logo.png" alt="Шаматов"></picture>
+    <h1 class="sr">Работно време</h1>
     <div class="now">
       <div class="t tnum" id="clockTime">00:00:00</div>
       <div class="d" id="clockDate"></div>
@@ -235,165 +293,270 @@ tr:last-child td{border-bottom:0}
     </div>
   </header>
 
-  <section class="card hero" id="hero" data-state="idle">
-    <div class="state">
-      <div class="state-ic" id="stateIcon"><svg class="i lg"><use href="#i-moon"/></svg></div>
-      <div class="state-txt">
-        <p class="state-title" id="stateTitle">Смената не е започната</p>
-        <p class="state-sub" id="stateSub">Притисни „Почеток на смена“ кога тргнуваш од дома.</p>
-      </div>
-      <div class="timer" id="timerBox" hidden>
-        <b class="tnum" id="segTimer">0:00:00</b>
-        <small><span class="pulse"></span><span id="segLabel">во тек</span></small>
-      </div>
-    </div>
+  <nav class="nav" aria-label="Навигација">
+    <button data-view="today" aria-current="page"><svg class="i"><use href="#i-clock"/></svg><span>Денес</span></button>
+    <button data-view="summary" aria-current="false"><svg class="i"><use href="#i-chart"/></svg><span>Збир</span></button>
+    <button data-view="history" aria-current="false"><svg class="i"><use href="#i-calendar"/></svg><span>Историја</span></button>
+    <button data-view="expenses" aria-current="false"><svg class="i"><use href="#i-receipt"/></svg><span>Трошоци</span></button>
+    <button data-view="data" aria-current="false"><svg class="i"><use href="#i-db"/></svg><span>Податоци</span></button>
+  </nav>
 
-    <label class="lbl" for="place">Град / објект</label>
-    <div class="input-ic">
-      <svg class="i"><use href="#i-pin"/></svg>
-      <input id="place" type="text" placeholder="Пример: Штип – Маркет 1" autocomplete="off">
-    </div>
-    <div class="chips" id="recentPlaces"></div>
+  <!-- ===== ДЕНЕС ===== -->
+  <section class="view" id="view-today">
+    <div class="cols">
+      <section class="card hero" id="hero" data-state="idle">
+        <div class="state">
+          <div class="state-ic" id="stateIcon"><svg class="i lg"><use href="#i-moon"/></svg></div>
+          <div class="state-txt">
+            <p class="state-title" id="stateTitle">Смената не е започната</p>
+            <p class="state-sub" id="stateSub">Притисни „Почеток на смена“ кога тргнуваш од дома.</p>
+          </div>
+          <div class="timer" id="timerBox" hidden>
+            <b class="tnum" id="segTimer">0:00:00</b>
+            <small><span class="pulse"></span><span id="segLabel">во тек</span></small>
+          </div>
+        </div>
 
-    <div class="actions">
-      <button class="tile" id="startShift" data-act="startShift">
-        <span class="ic"><svg class="i"><use href="#i-car"/></svg></span>
-        <span><b>Почеток на смена</b><small>Тргнуваш од дома</small></span>
-      </button>
-      <button class="tile work" id="startWork" data-act="startWork">
-        <span class="ic"><svg class="i"><use href="#i-briefcase"/></svg></span>
-        <span><b>Почеток на работа</b><small>Пристигна на објект</small></span>
-      </button>
-      <button class="tile work" id="endWork" data-act="endWork">
-        <span class="ic"><svg class="i"><use href="#i-check"/></svg></span>
-        <span><b>Крај на работа</b><small>Заврши на објектот</small></span>
-      </button>
-      <button class="tile pause" id="pause" data-act="startPause">
-        <span class="ic"><svg class="i"><use href="#i-coffee"/></svg></span>
-        <span><b>Пауза</b><small>Кратка или ручек</small></span>
-      </button>
-      <button class="tile pause" id="resume" data-act="endPause">
-        <span class="ic"><svg class="i"><use href="#i-play"/></svg></span>
-        <span><b>Продолжи</b><small>Крај на паузата</small></span>
-      </button>
-      <button class="tile danger" id="endShift" data-act="endShift">
-        <span class="ic"><svg class="i"><use href="#i-home"/></svg></span>
-        <span><b>Крај на смена</b><small>Стигна дома</small></span>
-      </button>
-    </div>
+        <div class="hero-body">
+          <label class="lbl" for="place">Град / објект</label>
+          <div class="input-ic">
+            <svg class="i"><use href="#i-pin"/></svg>
+            <input id="place" type="text" placeholder="Пример: Штип – Маркет 1" autocomplete="off">
+          </div>
+          <div class="chips" id="recentPlaces"></div>
 
-    <details class="help">
-      <summary><svg class="i sm"><use href="#i-info"/></svg>Како функционира</summary>
-      <p>Почеток на смена е кога тргнуваш од дома, а крај на смена кога се враќаш дома. Кога ќе започнеш активна работа, избраниот град/објект останува поврзан со таа работа сè до „Крај на работа“. Во една смена може да има повеќе делови работа на различни објекти. Пауза за време на работа не ја прекинува работата: делот продолжува, а времето на паузата се одзема од нето работата на тој дел. Времето кога не работиш и не си на пауза се брои како возење / слободно.</p>
-    </details>
+          <div class="actions">
+            <button class="tile" id="startShift" data-act="startShift">
+              <span class="ic"><svg class="i"><use href="#i-car"/></svg></span>
+              <span><b>Почеток на смена</b><small>Тргнуваш од дома</small></span>
+            </button>
+            <button class="tile work" id="startWork" data-act="startWork">
+              <span class="ic"><svg class="i"><use href="#i-briefcase"/></svg></span>
+              <span><b>Почеток на работа</b><small>Пристигна на објект</small></span>
+            </button>
+            <button class="tile work" id="endWork" data-act="endWork">
+              <span class="ic"><svg class="i"><use href="#i-check"/></svg></span>
+              <span><b>Крај на работа</b><small>Заврши на објектот</small></span>
+            </button>
+            <button class="tile pause" id="pause" data-act="startPause">
+              <span class="ic"><svg class="i"><use href="#i-coffee"/></svg></span>
+              <span><b>Пауза</b><small>Кратка или ручек</small></span>
+            </button>
+            <button class="tile pause" id="resume" data-act="endPause">
+              <span class="ic"><svg class="i"><use href="#i-play"/></svg></span>
+              <span><b>Продолжи</b><small>Крај на паузата</small></span>
+            </button>
+            <button class="tile danger" id="endShift" data-act="endShift">
+              <span class="ic"><svg class="i"><use href="#i-home"/></svg></span>
+              <span><b>Крај на смена</b><small>Стигна дома</small></span>
+            </button>
+          </div>
+
+          <details class="help">
+            <summary><svg class="i sm"><use href="#i-info"/></svg>Како функционира</summary>
+            <p>Почеток на смена е кога тргнуваш од дома, а крај на смена кога се враќаш дома. Кога ќе започнеш активна работа, избраниот град/објект останува поврзан со таа работа сè до „Крај на работа“. Во една смена може да има повеќе делови работа на различни објекти. Пауза за време на работа не ја прекинува работата: делот продолжува, а времето на паузата се одзема од нето работата на тој дел. Времето кога не работиш и не си на пауза се брои како возење / слободно.</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2><svg class="i"><use href="#i-gauge"/></svg><span id="shiftHeading">Тековна смена</span></h2>
+        </div>
+        <div class="shift-grid">
+          <div class="donut" id="donut" role="img" aria-label="Распоред на смената: работа, пауза, возење">
+            <div class="donut-in"><strong class="tnum" id="donutVal">0:00</strong><small>вкупно</small></div>
+          </div>
+          <div class="stats">
+            <div class="stat c-shift"><span class="ic"><svg class="i"><use href="#i-clock"/></svg></span><div><small>Вкупно смена</small><strong class="tnum" id="totalShift">0:00</strong></div></div>
+            <div class="stat c-work"><span class="ic"><svg class="i"><use href="#i-briefcase"/></svg></span><div><small>Активна работа</small><strong class="tnum" id="totalWork">0:00</strong></div></div>
+            <div class="stat c-pause"><span class="ic"><svg class="i"><use href="#i-coffee"/></svg></span><div><small>Пауза</small><strong class="tnum" id="totalPause">0:00</strong></div></div>
+            <div class="stat c-drive"><span class="ic"><svg class="i"><use href="#i-route"/></svg></span><div><small>Возење / слободно</small><strong class="tnum" id="totalFree">0:00</strong></div></div>
+          </div>
+        </div>
+        <div class="timeline" id="timeline" hidden>
+          <div class="bar" id="timelineBar"></div>
+          <div class="bar-meta tnum"><span id="tlStart"></span><span id="tlEnd"></span></div>
+          <div class="legend">
+            <span><i style="background:var(--work)"></i>Работа</span>
+            <span><i style="background:var(--pause)"></i>Пауза</span>
+            <span><i style="background:var(--drive-bg);border:1px solid var(--line)"></i>Возење / слободно</span>
+          </div>
+        </div>
+      </section>
+    </div>
   </section>
 
-  <div class="grid-2 stack">
-    <section class="card">
-      <div class="card-head">
-        <h2><svg class="i"><use href="#i-gauge"/></svg><span id="shiftHeading">Тековна смена</span></h2>
-      </div>
-      <div class="stats">
-        <div class="stat c-shift"><span class="ic"><svg class="i"><use href="#i-clock"/></svg></span><div><small>Вкупно смена</small><strong class="tnum" id="totalShift">0:00</strong></div></div>
-        <div class="stat c-work"><span class="ic"><svg class="i"><use href="#i-briefcase"/></svg></span><div><small>Активна работа</small><strong class="tnum" id="totalWork">0:00</strong></div></div>
-        <div class="stat c-pause"><span class="ic"><svg class="i"><use href="#i-coffee"/></svg></span><div><small>Пауза</small><strong class="tnum" id="totalPause">0:00</strong></div></div>
-        <div class="stat c-drive"><span class="ic"><svg class="i"><use href="#i-route"/></svg></span><div><small>Возење / слободно</small><strong class="tnum" id="totalFree">0:00</strong></div></div>
-      </div>
-      <div class="timeline" id="timeline" hidden>
-        <div class="bar" id="timelineBar"></div>
-        <div class="bar-meta tnum"><span id="tlStart"></span><span id="tlEnd"></span></div>
-        <div class="legend">
-          <span><i style="background:var(--work)"></i>Работа</span>
-          <span><i style="background:var(--pause)"></i>Пауза</span>
-          <span><i style="background:var(--drive-bg);border:1px solid var(--line)"></i>Возење / слободно</span>
+  <!-- ===== ЗБИР ===== -->
+  <section class="view" id="view-summary" hidden>
+    <div class="cols">
+      <section class="card">
+        <div class="card-head">
+          <h2><svg class="i"><use href="#i-chart"/></svg>Збир</h2>
+          <div class="seg" role="group" aria-label="Период">
+            <button data-period="today" aria-pressed="true">Денес</button>
+            <button data-period="week" aria-pressed="false">Недела</button>
+            <button data-period="month" aria-pressed="false">Месец</button>
+          </div>
         </div>
-      </div>
-    </section>
+        <div class="stats">
+          <div class="stat c-work"><span class="ic"><svg class="i"><use href="#i-briefcase"/></svg></span><div><small>Работа</small><strong class="tnum" id="pWork">0:00</strong></div></div>
+          <div class="stat c-shift"><span class="ic"><svg class="i"><use href="#i-calendar"/></svg></span><div><small>Смени</small><strong class="tnum" id="pShifts">0</strong></div></div>
+          <div class="stat c-pause"><span class="ic"><svg class="i"><use href="#i-coffee"/></svg></span><div><small>Пауза</small><strong class="tnum" id="pPause">0:00</strong></div></div>
+          <div class="stat c-drive"><span class="ic"><svg class="i"><use href="#i-route"/></svg></span><div><small>Возење / слободно</small><strong class="tnum" id="pFree">0:00</strong></div></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2><svg class="i"><use href="#i-calendar"/></svg>Оваа недела</h2>
+          <span class="muted" style="margin:0">Работа вкупно: <b class="tnum" id="weekTotal">0:00</b></span>
+        </div>
+        <div class="week" id="weekChart"></div>
+      </section>
+    </div>
 
     <section class="card">
       <div class="card-head">
-        <h2><svg class="i"><use href="#i-chart"/></svg>Збир</h2>
-        <div class="seg" role="group" aria-label="Период">
-          <button data-period="today" aria-pressed="true">Денес</button>
-          <button data-period="week" aria-pressed="false">Недела</button>
-          <button data-period="month" aria-pressed="false">Месец</button>
-        </div>
+        <h2><svg class="i"><use href="#i-pin"/></svg>Работа по објект</h2>
+        <span class="muted" style="margin:0">за избраниот период</span>
       </div>
-      <div class="stats">
-        <div class="stat c-work"><span class="ic"><svg class="i"><use href="#i-briefcase"/></svg></span><div><small>Работа</small><strong class="tnum" id="pWork">0:00</strong></div></div>
-        <div class="stat c-shift"><span class="ic"><svg class="i"><use href="#i-calendar"/></svg></span><div><small>Смени</small><strong class="tnum" id="pShifts">0</strong></div></div>
-        <div class="stat c-pause"><span class="ic"><svg class="i"><use href="#i-coffee"/></svg></span><div><small>Пауза</small><strong class="tnum" id="pPause">0:00</strong></div></div>
-        <div class="stat c-drive"><span class="ic"><svg class="i"><use href="#i-route"/></svg></span><div><small>Возење / слободно</small><strong class="tnum" id="pFree">0:00</strong></div></div>
-      </div>
-      <p class="sub-h">Работа по објект</p>
       <div class="places" id="placeBreakdown"></div>
     </section>
-  </div>
-
-  <section class="card">
-    <div class="card-head">
-      <h2><svg class="i"><use href="#i-calendar"/></svg>Ден</h2>
-      <div class="day-pick">
-        <select id="daySelect" aria-label="Избери ден"></select>
-      </div>
-    </div>
-    <div class="tabs" role="tablist">
-      <button role="tab" aria-selected="true" data-tab="intervals"><svg class="i sm"><use href="#i-list"/></svg>Интервали</button>
-      <button role="tab" aria-selected="false" data-tab="editor"><svg class="i sm"><use href="#i-pencil"/></svg>Исправка</button>
-    </div>
-
-    <div id="tab-intervals">
-      <div class="day-total" id="dayTotal"></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Тип</th><th>Град / објект</th><th>Почеток</th><th>Крај</th><th>Траење</th><th>Одземена пауза</th><th>Нето работа</th></tr></thead>
-          <tbody id="intervalRows"></tbody>
-        </table>
-      </div>
-      <div class="empty" id="emptyIntervals"><svg class="i"><use href="#i-list"/></svg>Нема интервали за овој ден. Започни смена за да се појават.</div>
-    </div>
-
-    <div id="tab-editor" hidden>
-      <div class="warn"><svg class="i"><use href="#i-alert"/></svg><span>Исправките веднаш се зачувуваат во овој прелистувач. Провери го редоследот на настаните пред да ја симнеш архивата.</span></div>
-      <div class="table-wrap editor">
-        <table>
-          <thead><tr><th>Датум и време</th><th>Тип на настан</th><th>Град / објект</th><th></th></tr></thead>
-          <tbody id="eventEditorRows"></tbody>
-        </table>
-      </div>
-      <div class="empty" id="emptyEditor"><svg class="i"><use href="#i-pencil"/></svg>Нема настани за избраниот ден.</div>
-      <div class="add-row editor">
-        <div><label class="lbl" for="newAt">Датум и време</label><input id="newAt" type="datetime-local"></div>
-        <div><label class="lbl" for="newType">Тип на настан</label><select id="newType"></select></div>
-        <div><label class="lbl" for="newPlace">Град / објект</label><input id="newPlace" type="text" placeholder="Ако е потребно"></div>
-        <button class="btn primary" id="addEventBtn"><svg class="i"><use href="#i-plus"/></svg>Додај настан</button>
-      </div>
-      <p class="muted">Заборавил да притисне копче? Додај го настанот рачно со точното време.</p>
-    </div>
   </section>
 
-  <section class="card">
-    <div class="export-grid">
-      <div>
-        <h3><svg class="i"><use href="#i-sheet"/></svg>Извештај за Excel</h3>
-        <p class="muted">Excel датотека со четири листови: збир по ден, по ден и локација, по локација и детали за секој дел.</p>
+  <!-- ===== ИСТОРИЈА ===== -->
+  <section class="view" id="view-history" hidden>
+    <section class="card">
+      <div class="card-head">
+        <h2><svg class="i"><use href="#i-calendar"/></svg>Ден</h2>
+        <div class="day-pick">
+          <button class="icon-btn" id="dayPrev" aria-label="Претходен ден"><svg class="i sm"><use href="#i-left"/></svg></button>
+          <select id="daySelect" aria-label="Избери ден"></select>
+          <button class="icon-btn" id="dayNext" aria-label="Следен ден"><svg class="i sm"><use href="#i-right"/></svg></button>
+        </div>
+      </div>
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="intervals"><svg class="i sm"><use href="#i-list"/></svg>Интервали</button>
+        <button role="tab" aria-selected="false" data-tab="editor"><svg class="i sm"><use href="#i-pencil"/></svg>Исправка</button>
+      </div>
+
+      <div id="tab-intervals">
+        <div class="day-total" id="dayTotal"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Тип</th><th>Град / објект</th><th>Почеток</th><th>Крај</th><th>Траење</th><th>Одземена пауза</th><th>Нето работа</th></tr></thead>
+            <tbody id="intervalRows"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="emptyIntervals"><svg class="i"><use href="#i-list"/></svg>Нема интервали за овој ден. Започни смена за да се појават.</div>
+      </div>
+
+      <div id="tab-editor" hidden>
+        <div class="warn"><svg class="i"><use href="#i-alert"/></svg><span>Исправките веднаш се зачувуваат. Провери го редоследот на настаните пред да ја симнеш архивата.</span></div>
+        <div class="table-wrap editor">
+          <table>
+            <thead><tr><th>Датум и време</th><th>Тип на настан</th><th>Град / објект</th><th></th></tr></thead>
+            <tbody id="eventEditorRows"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="emptyEditor"><svg class="i"><use href="#i-pencil"/></svg>Нема настани за избраниот ден.</div>
+        <div class="add-row editor">
+          <div><label class="lbl" for="newAt">Датум и време</label><input id="newAt" type="datetime-local"></div>
+          <div><label class="lbl" for="newType">Тип на настан</label><select id="newType"></select></div>
+          <div><label class="lbl" for="newPlace">Град / објект</label><input id="newPlace" type="text" placeholder="Ако е потребно"></div>
+          <button class="btn primary" id="addEventBtn"><svg class="i"><use href="#i-plus"/></svg>Додај настан</button>
+        </div>
+        <p class="muted">Заборавил да притисне копче? Додај го настанот рачно со точното време.</p>
+      </div>
+    </section>
+  </section>
+
+  <!-- ===== ПОДАТОЦИ ===== -->
+  <!-- ===== ТРОШОЦИ ЗА ХРАНА ===== -->
+  <section class="view" id="view-expenses" hidden>
+    <div class="cols">
+      <section class="card">
+        <div class="card-head"><h2><svg class="i"><use href="#i-receipt"/></svg>Нова сметка</h2></div>
+        <div class="form-grid">
+          <div><label class="lbl" for="xDate">Датум</label><input id="xDate" type="date"></div>
+          <div><label class="lbl" for="xAmount">Износ (ден.)</label><input id="xAmount" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+        </div>
+        <label class="lbl" for="xPayer" style="margin-top:12px">Кој плати</label>
+        <div class="input-ic">
+          <svg class="i"><use href="#i-user"/></svg>
+          <input id="xPayer" type="text" placeholder="Име на вработениот" autocomplete="off">
+        </div>
+        <div class="chips" id="xPayerChips"></div>
+        <label class="lbl" style="margin-top:12px">Категорија</label>
+        <div class="seg xcats" role="group" aria-label="Категорија">
+          <button data-xcat="Храна" aria-pressed="true">Храна</button>
+          <button data-xcat="Паркинг" aria-pressed="false">Паркинг</button>
+          <button data-xcat="Нафта" aria-pressed="false">Нафта</button>
+          <button data-xcat="other" aria-pressed="false">Друго</button>
+        </div>
+        <div id="xOtherWrap" hidden style="margin-top:10px">
+          <input id="xCatName" type="text" list="xCatList" placeholder="Напиши категорија, пр. Материјал" autocomplete="off">
+          <datalist id="xCatList"></datalist>
+        </div>
+        <label class="lbl" for="xNote" style="margin-top:12px">Забелешка (по желба)</label>
+        <input id="xNote" type="text" placeholder="Пример: ручек, пекара" autocomplete="off">
+        <button class="btn primary" id="xAdd" style="margin-top:14px;width:100%"><svg class="i"><use href="#i-plus"/></svg>Додај сметка</button>
+        <p class="muted" style="margin-top:10px">За еден ден можеш да додадеш повеќе сметки, секоја со своја сума.</p>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2><svg class="i"><use href="#i-chart"/></svg>Збир</h2>
+          <div class="seg" role="group" aria-label="Период">
+            <button data-xperiod="today" aria-pressed="false">Денес</button>
+            <button data-xperiod="week" aria-pressed="false">Недела</button>
+            <button data-xperiod="month" aria-pressed="true">Месец</button>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat c-work"><span class="ic"><svg class="i"><use href="#i-receipt"/></svg></span><div><small>Вкупно</small><strong class="tnum" id="xTotal">0 ден.</strong></div></div>
+          <div class="stat c-shift"><span class="ic"><svg class="i"><use href="#i-list"/></svg></span><div><small>Сметки</small><strong class="tnum" id="xCount">0</strong></div></div>
+        </div>
+        <p class="sub-h">Колку платил секој</p>
+        <div class="places" id="xByPerson"></div>
+        <p class="sub-h">По категорија</p>
+        <div class="places" id="xByCat"></div>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="card-head"><h2><svg class="i"><use href="#i-list"/></svg>Сметки</h2></div>
+      <div id="xList"></div>
+    </section>
+  </section>
+
+  <section class="view" id="view-data" hidden>
+    <div class="cols even">
+      <section class="card">
+        <div class="card-head"><h2><svg class="i"><use href="#i-sheet"/></svg>Извештај за Excel</h2></div>
+        <p class="muted">Excel датотека со четири листови: збир по ден, по ден и локација, по локација и детали за секој дел. Неделите се од понеделник до недела. Сметките се во посебен лист за секој месец (еден ред за секој ден: нафта, секоја сметка за храна во своја ќелија, останато и збир по лице), плус лист „Сметки“ со секоја сметка поединечно (ден, лице, храна, нафта, паркинг, друго, вкупно).</p>
+        <label class="lbl" for="xlsTitle">Наслов на листовите со трошоци (по желба)</label>
+        <input id="xlsTitle" type="text" placeholder="Пример: Peugeot" autocomplete="off" style="margin-bottom:12px">
         <div class="btn-row">
-          <button class="btn primary" id="xlsDay"><svg class="i"><use href="#i-download"/></svg>Избраниот ден</button>
-          <button class="btn" id="xlsLastWeek"><svg class="i"><use href="#i-download"/></svg>Минатата недела</button>
+          <button class="btn primary" id="xlsLastWeek"><svg class="i"><use href="#i-download"/></svg>Минатата недела</button>
           <button class="btn" id="xlsWeek"><svg class="i"><use href="#i-download"/></svg>Оваа недела</button>
+          <button class="btn" id="xlsDay"><svg class="i"><use href="#i-download"/></svg>Избраниот ден</button>
           <button class="btn" id="xlsMonth"><svg class="i"><use href="#i-download"/></svg>Овој месец</button>
           <button class="btn" id="xlsAll"><svg class="i"><use href="#i-download"/></svg>Сите денови</button>
         </div>
-      </div>
-      <div>
-        <h3><svg class="i"><use href="#i-db"/></svg>Резервна копија</h3>
-        <p class="muted">Податоците живеат само во овој прелистувач. Зачувај копија одвреме-навреме, или префрли ги на друг телефон.</p>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2><svg class="i"><use href="#i-db"/></svg>Резервна копија</h2></div>
+        <p class="muted">Најавена со Google, податоците се синхронизираат и меѓу уреди. Сепак, зачувај копија одвреме-навреме, или префрли ги на друг телефон.</p>
+        <p class="backup-info tnum" id="lastBackup"></p>
         <div class="btn-row">
-          <button class="btn" id="backupOut"><svg class="i"><use href="#i-download"/></svg>Зачувај копија</button>
+          <button class="btn primary" id="backupOut"><svg class="i"><use href="#i-download"/></svg>Зачувај копија</button>
           <button class="btn" id="backupIn"><svg class="i"><use href="#i-upload"/></svg>Врати од копија</button>
           <input type="file" id="backupFile" accept=".json,application/json" hidden>
         </div>
-      </div>
+      </section>
     </div>
   </section>
 </main>
@@ -437,11 +600,12 @@ function loadData(){
     if(!raw)return{events:[],session:null};
     const p=JSON.parse(raw);
     if(Array.isArray(p))return{events:p,session:null};
-    if(p&&Array.isArray(p.events))return{events:p.events,session:p.session||null};
+    if(p&&Array.isArray(p.events))return{events:p.events,session:p.session||null,expenses:Array.isArray(p.expenses)?p.expenses:[]};
     return{events:[],session:null};
   }catch(e){loadFailed=true;return{events:[],session:null}}
 }
 let db=loadData();
+db.expenses=db.expenses||[];
 function saveData(){
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
   catch(e){toast('Податоците не можат да се зачуваат во овој прелистувач.','err')}
@@ -636,7 +800,7 @@ function render(){
   document.querySelectorAll('.tile').forEach(t=>t.classList.toggle('next',t.id===next));
 
   calc=calculate();
-  renderShift();renderRecent();renderPeriod();updateDaySelect();renderDay();updateHero();
+  renderShift();renderRecent();renderPeriod();renderWeek();renderExpenses();updateDaySelect();renderDay();renderBackupInfo();updateHero();
 }
 
 function renderShift(){
@@ -647,6 +811,9 @@ function renderShift(){
   $('totalWork').textContent=shown?duration(shown.work):'0:00';
   $('totalPause').textContent=shown?duration(shown.pause):'0:00';
   $('totalFree').textContent=shown?duration(shown.free):'0:00';
+  const T=shown?shown.total:0,pw=T?shown.work/T*100:0,pp=T?shown.pause/T*100:0;
+  $('donut').style.background=T?`conic-gradient(var(--work) 0 ${pw}%,var(--pause) ${pw}% ${pw+pp}%,var(--drive) ${pw+pp}% 100%)`:'var(--surface-2)';
+  $('donutVal').textContent=duration(T);
   const tl=$('timeline');
   if(!shown||shown.total<=0){tl.hidden=true;return}
   tl.hidden=false;
@@ -808,7 +975,7 @@ function colName(i){let s='';i++;while(i){const m=(i-1)%26;s=String.fromCharCode
 /* styles: 0 normal, 1 header, 2 date, 3 time, 4 duration, 5 total, 6 total duration, 7 title, 8 muted note */
 const serial=d=>{d=new Date(d);return(d.getTime()-d.getTimezoneOffset()*60000)/864e5+25569};
 const mins=ms=>Math.floor(Math.max(0,ms)/60000)/1440;
-const XD=d=>({v:Math.floor(serial(d)),s:2}),XT=d=>({v:Math.floor(serial(d)%1*1440+1e-6)/1440,s:3}),XH=ms=>({v:mins(ms),s:4}),XHT=()=>({sum:1,s:6});
+const XD=d=>({v:Math.floor(serial(d)),s:2}),XT=d=>({v:Math.floor(serial(d)%1*1440+1e-6)/1440,s:3}),XH=ms=>({v:mins(ms),s:4}),XHT=()=>({sum:1,s:6}),XM=n=>({v:n,s:9}),XMT=()=>({sum:1,s:10});
 function sheetXml({title,note,head,rows,total,widths}){
   let r=1,hr=0;const out=[];
   const row=(cells,def)=>{const rr=r++;out.push(`<row r="${rr}">`+cells.map((c,i)=>{
@@ -825,7 +992,7 @@ function sheetXml({title,note,head,rows,total,widths}){
   if(total)row(total,5);
   return`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="${hr}" topLeftCell="A${hr+1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${widths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${out.join('')}</sheetData></worksheet>`;
 }
-const STYLES=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="3"><numFmt numFmtId="164" formatCode="dd.mm.yyyy"/><numFmt numFmtId="165" formatCode="hh:mm"/><numFmt numFmtId="166" formatCode="[h]:mm"/></numFmts><fonts count="5"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="15"/><color rgb="FF14213D"/><name val="Calibri"/></font><font><i/><sz val="10"/><color rgb="FF5E6B80"/><name val="Calibri"/></font></fonts><fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF14213D"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE2F3EB"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="3"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FFDDE3EA"/></bottom><diagonal/></border><border><left/><right/><top style="thin"><color rgb="FF0E8A5F"/></top><bottom style="thin"><color rgb="FF0E8A5F"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="9"><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"><alignment horizontal="left"/></xf><xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="166" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="0" fontId="2" fillId="3" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="166" fontId="2" fillId="3" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+const STYLES=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="7"><numFmt numFmtId="164" formatCode="dd.mm.yyyy"/><numFmt numFmtId="165" formatCode="hh:mm"/><numFmt numFmtId="166" formatCode="[h]:mm"/><numFmt numFmtId="167" formatCode="#,##0.00"/><numFmt numFmtId="168" formatCode="d-mmm"/><numFmt numFmtId="169" formatCode="ddd"/><numFmt numFmtId="170" formatCode="#,##0&quot; ден&quot;"/></numFmts><fonts count="5"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="15"/><color rgb="FF14213D"/><name val="Calibri"/></font><font><i/><sz val="10"/><color rgb="FF5E6B80"/><name val="Calibri"/></font></fonts><fills count="6"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF14213D"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE2F3EB"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFDCE6F7"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE7E6E6"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="4"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FFDDE3EA"/></bottom><diagonal/></border><border><left/><right/><top style="thin"><color rgb="FF0E8A5F"/></top><bottom style="thin"><color rgb="FF0E8A5F"/></bottom><diagonal/></border><border><left style="thin"><color rgb="FF000000"/></left><right style="thin"><color rgb="FF000000"/></right><top style="thin"><color rgb="FF000000"/></top><bottom style="thin"><color rgb="FF000000"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="25"><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"><alignment horizontal="left"/></xf><xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="166" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="0" fontId="2" fillId="3" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="166" fontId="2" fillId="3" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="167" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="167" fontId="2" fillId="3" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="168" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="169" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="170" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="168" fontId="0" fillId="4" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="169" fontId="0" fillId="4" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="170" fontId="0" fillId="4" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="0" fillId="4" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="2" fillId="5" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center"/></xf><xf numFmtId="0" fontId="2" fillId="5" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="centerContinuous"/></xf><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="centerContinuous"/></xf><xf numFmtId="170" fontId="2" fillId="5" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="170" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
 function buildXlsx(sheets){
   const files=[
     {name:'[Content_Types].xml',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`},
@@ -833,9 +1000,45 @@ function buildXlsx(sheets){
     {name:'xl/workbook.xml',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((x,i)=>`<sheet name="${xe(x.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets></workbook>`},
     {name:'xl/_rels/workbook.xml.rels',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((_,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`},
     {name:'xl/styles.xml',data:STYLES},
-    ...sheets.map((x,i)=>({name:`xl/worksheets/sheet${i+1}.xml`,data:sheetXml(x)}))
+    ...sheets.map((x,i)=>({name:`xl/worksheets/sheet${i+1}.xml`,data:x.xml||sheetXml(x)}))
   ];
   return zipStore(files);
+}
+
+const MONTHS=['Јануари','Февруари','Март','Април','Мај','Јуни','Јули','Август','Септември','Октомври','Ноември','Декември'];
+// One sheet per month, one row per day (all days, weekends shaded): fuel | each food bill in its own cell | everything else
+function monthSheet(y,m,list,prefix){
+  const days=new Date(y,m+1,0).getDate(),by={};
+  const isC=(e,n)=>catOf(e).toLowerCase()===n.toLowerCase();
+  list.forEach(e=>{const d=+e.date.slice(8,10);(by[d]=by[d]||[]).push(e)});
+  const k=Math.max(2,...Object.values(by).map(a=>a.filter(e=>isC(e,'Храна')).length));
+  const last=4+k,L=colName(last);
+  const c=(i,r,s,v)=>{const ref=colName(i)+r;
+    if(v===''||v==null)return`<c r="${ref}" s="${s}"/>`;
+    if(typeof v==='number')return`<c r="${ref}" s="${s}"><v>${v}</v></c>`;
+    return`<c r="${ref}" t="inlineStr" s="${s}"><is><t xml:space="preserve">${xe(v)}</t></is></c>`};
+  const f=(i,r,s,fx)=>`<c r="${colName(i)+r}" s="${s}"><f>${fx}</f></c>`;
+  const rows=[];
+  const title=(prefix?prefix+'- ':'')+MONTHS[m].toUpperCase()+(prefix?'':' '+y);
+  rows.push(`<row r="1" ht="24" customHeight="1">${Array.from({length:last+1},(_,i)=>c(i,1,21,i?'':title)).join('')}</row>`);
+  rows.push(`<row r="2">${Array.from({length:last+1},(_,i)=>c(i,2,i>=4&&i<last?20:19,i===3?'нафта':i===4?'Сметки':i===last?'Останато':'')).join('')}</row>`);
+  for(let d=1;d<=days;d++){
+    const r=2+d,dt=new Date(y,m,d),o=dt.getDay()%6===0?4:0,sn=Math.floor(serial(dt)),items=by[d]||[];
+    const food=items.filter(e=>isC(e,'Храна')).map(e=>e.amount);
+    const fuel=items.filter(e=>isC(e,'Нафта')).reduce((n,e)=>n+e.amount,0);
+    const rest=items.filter(e=>!isC(e,'Храна')&&!isC(e,'Нафта')).reduce((n,e)=>n+e.amount,0);
+    const names=[...new Map(items.map(e=>[catOf(e).toLowerCase(),catOf(e)])).values()]
+      .sort((a,b)=>{const ia=FIXED.findIndex(x=>x.toLowerCase()===a.toLowerCase()),ib=FIXED.findIndex(x=>x.toLowerCase()===b.toLowerCase());return(ia<0?9:ia)-(ib<0?9:ib)});
+    const notes=items.map(e=>e.note).filter(Boolean).join('; ');
+    const desc=names.join('/')+(notes?(names.length?' (':'(')+notes+')':'');
+    rows.push(`<row r="${r}">${[c(0,r,11+o,sn),c(1,r,12+o,sn),c(2,r,14+o,desc),c(3,r,13+o,fuel||''),...Array.from({length:k},(_,j)=>c(4+j,r,13+o,food[j]??'')),c(last,r,13+o,rest||'')].join('')}</row>`);
+  }
+  const end=2+days,tr=end+2;
+  rows.push(`<row r="${tr}">${f(3,tr,22,`SUM(D3:D${end})`)}${f(4,tr,22,`SUM(E3:${L}${end})`)}${Array.from({length:k-1},(_,j)=>c(5+j,tr,22,'')).join('')}</row>`);
+  const pp={};list.filter(e=>!isC(e,'Нафта')).forEach(e=>{pp[e.payer]=(pp[e.payer]||0)+e.amount});
+  Object.entries(pp).sort((a,b)=>b[1]-a[1]).forEach(([p,v],i)=>{const r=tr+1+i;rows.push(`<row r="${r}">${c(3,r,23,p)}${c(4,r,24,Math.round(v*100)/100)}</row>`)});
+  const widths=[9,7,36,13,...Array.from({length:k},()=>13),13];
+  return{name:MONTHS[m]+String(y).slice(2),xml:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"/></sheetViews><cols>${widths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${rows.join('')}</sheetData></worksheet>`};
 }
 
 function downloadArchive(pred,name,label){
@@ -843,7 +1046,8 @@ function downloadArchive(pred,name,label){
   const shifts=r.shifts.filter(s=>pred(s.start));
   const works=r.intervals.filter(i=>i.type===WORK&&pred(i.start)).sort((a,b)=>a.start-b.start);
   const pauses=r.intervals.filter(i=>i.type===PAUSE&&pred(i.start));
-  if(!shifts.length&&!works.length)return toast('Нема податоци за '+label+'.','warn');
+  const exps=db.expenses.filter(e=>pred(new Date(e.date+'T00:00:00'))).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  if(!shifts.length&&!works.length&&!exps.length)return toast('Нема податоци за '+label+'.','warn');
   const loc=i=>i.place||'Без објект';
   const sum=(arr,k)=>arr.reduce((n,x)=>n+x[k],0);
   const period=(()=>{const ds=[...shifts.map(s=>s.start),...works.map(w=>w.start)].sort((a,b)=>a-b);return ds.length?`Период: ${dateText(ds[0])} – ${dateText(ds[ds.length-1])} · Извештајот е креиран ${dateText(new Date())} во ${timeText(new Date())}`:''})();
@@ -920,6 +1124,21 @@ function downloadArchive(pred,name,label){
      head:['Датум','Ден','Тип','Град / објект','Почеток','Крај','Траење','Одземена пауза','Нето работа'],
      rows:det,widths:[12,13,17,30,9,9,10,16,13]}
   ];
+  if(exps.length){
+    let prefix='';try{prefix=(localStorage.getItem(XLS_TITLE_KEY)||'').trim()}catch(e){}
+    const byM={};
+    exps.forEach(e=>{const k=e.date.slice(0,7);(byM[k]=byM[k]||[]).push(e)});
+    Object.keys(byM).sort().forEach(k=>sheets.push(monthSheet(+k.slice(0,4),+k.slice(5,7)-1,byM[k],prefix)));
+    // every bill on its own row, with its amount in the column of its category (anything but the three fixed ones goes to "Друго")
+    const low=['храна','нафта','паркинг']; // same order as the column headers below
+    sheets.push({name:'Сметки',title:'Сметки – секоја поединечно',note:period,
+      head:['Ден','Лице','Храна','Нафта','Паркинг','Друго','Вкупно','Забелешка'],
+      rows:exps.map(e=>{
+        const d=new Date(e.date+'T00:00:00'),i=low.indexOf(catOf(e).toLowerCase());
+        return[XD(d),e.payer,...low.map((_,j)=>j===i?XM(e.amount):''),i<0?XM(e.amount):'',XM(e.amount),[i<0?catOf(e):'',e.note].filter(Boolean).join(' – ')];
+      }),
+      total:['ВКУПНО','',XMT(),XMT(),XMT(),XMT(),XMT(),''],widths:[12,22,12,12,12,12,14,36]});
+  }
   downloadBlob(buildXlsx(sheets),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',name);
   toast('Excel извештајот е симнат.');
 }
@@ -940,15 +1159,15 @@ $('xlsMonth').addEventListener('click',()=>{
   downloadArchive(d=>d>=from,`Rabotno_vreme_${n.getFullYear()}-${pad(n.getMonth()+1)}.xlsx`,'овој месец');
 });
 $('xlsAll').addEventListener('click',()=>{
-  if(!db.events.length)return toast('Сè уште нема податоци за архивирање.','warn');
+  if(!db.events.length&&!db.expenses.length)return toast('Сè уште нема податоци за архивирање.','warn');
   downloadArchive(()=>true,`Arhiva_rabotno_vreme_${dateKey(new Date())}.xlsx`,'архивата');
 });
 
 /* ---------- Backup ---------- */
 $('backupOut').addEventListener('click',()=>{
-  if(!db.events.length)return toast('Нема податоци за зачувување.','warn');
+  if(!db.events.length&&!db.expenses.length)return toast('Нема податоци за зачувување.','warn');
   downloadBlob([JSON.stringify({app:'rabotno-vreme',version:1,exported:new Date().toISOString(),...db},null,1)],'application/json',`Rabotno_vreme_kopija_${dateKey(new Date())}.json`);
-  try{localStorage.setItem(BACKUP_KEY,String(Date.now()))}catch(e){}
+  try{localStorage.setItem(BACKUP_KEY,String(Date.now()))}catch(e){}renderBackupInfo();
   toast('Копијата е зачувана.');
 });
 $('backupIn').addEventListener('click',()=>$('backupFile').click());
@@ -961,11 +1180,127 @@ $('backupFile').addEventListener('change',async ev=>{
     const key=e=>String(e.id)+'|'+e.at+'|'+e.type;
     const have=new Set(db.events.map(key));
     const fresh=incoming.filter(e=>e&&e.type&&TYPES[e.type]&&!have.has(key(e)));
-    if(!fresh.length)return toast('Сите настани од копијата веќе постојат.','warn');
-    if(!confirm(`Ќе се додадат ${fresh.length} нови настани од копијата. Постоечките податоци остануваат. Продолжи?`))return;
-    db.events.push(...fresh);saveData();render();toast(`Вратени ${fresh.length} настани.`);
+    const haveX=new Set(db.expenses.map(e=>String(e.id)));
+    const freshX=(Array.isArray(p.expenses)?p.expenses:[]).filter(e=>e&&e.date&&e.payer&&e.amount>0&&!haveX.has(String(e.id)));
+    if(!fresh.length&&!freshX.length)return toast('Сите податоци од копијата веќе постојат.','warn');
+    if(!confirm(`Ќе се додадат ${fresh.length} нови настани и ${freshX.length} сметки од копијата. Постоечките податоци остануваат. Продолжи?`))return;
+    db.events.push(...fresh);db.expenses.push(...freshX);saveData();render();toast(`Вратени ${fresh.length} настани и ${freshX.length} сметки.`);
   }catch(e){toast('Датотеката не е валидна копија од оваа апликација.','err')}
 });
+
+/* ---------- Views, week chart, day stepper, backup info ---------- */
+const VIEWS=['today','summary','history','expenses','data'];
+function showView(v){
+  VIEWS.forEach(x=>{$('view-'+x).hidden=x!==v});
+  document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-current',b.dataset.view===v?'page':'false'));
+  try{sessionStorage.setItem('rv_view',v)}catch(e){}
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+let lastView='today';try{lastView=sessionStorage.getItem('rv_view')||'today'}catch(e){}
+showView(VIEWS.includes(lastView)?lastView:'today');
+
+function renderWeek(){
+  const mon=periodStart('week'),today=dateKey(new Date()),by={};
+  calc.intervals.filter(i=>i.type===WORK).forEach(i=>{const k=dateKey(i.start);by[k]=(by[k]||0)+i.dur});
+  const names=['Пон','Вто','Сре','Чет','Пет','Саб','Нед'];
+  const days=names.map((n,i)=>{const d=new Date(mon);d.setDate(d.getDate()+i);const k=dateKey(d);return{n,k,ms:by[k]||0}});
+  const max=Math.max(...days.map(d=>d.ms),8*36e5); // scale to at least an 8h day so an empty week stays flat
+  $('weekChart').innerHTML=days.map(d=>`<div class="wd${d.k===today?' today':''}${d.ms?' on':''}"><span class="v tnum">${d.ms?duration(d.ms):''}</span><div class="tr"><div class="b" style="height:${Math.max(d.ms/max*100,2)}%"></div></div><span class="l">${d.n}</span></div>`).join('');
+  $('weekTotal').textContent=duration(days.reduce((n,d)=>n+d.ms,0));
+}
+
+function stepDay(dir){ // options are newest first, so +1 = older day
+  const el=$('daySelect'),i=el.selectedIndex+dir;
+  if(el.disabled||i<0||i>=el.options.length)return;
+  el.selectedIndex=i;daySel=el.value;renderDay();
+}
+$('dayPrev').addEventListener('click',()=>stepDay(1));
+$('dayNext').addEventListener('click',()=>stepDay(-1));
+
+function renderBackupInfo(){
+  let t=0;try{t=+localStorage.getItem(BACKUP_KEY)||0}catch(e){}
+  $('lastBackup').textContent=t?'Последна копија: '+dateText(t)+' во '+timeText(t):'Сè уште нема направена копија.';
+}
+
+/* ---------- Food expenses: db.expenses = [{id,date:'YYYY-MM-DD',payer,amount,note}] ---------- */
+const XLS_TITLE_KEY='rv_xls_title';
+let xPeriod='month',xCat='Храна';
+const FIXED=['Храна','Паркинг','Нафта']; // 4th option "Друго" = a category the user types
+const catOf=e=>(e.cat||'Храна').trim();
+const money=n=>(Math.round(n*100)/100).toLocaleString('mk-MK',{maximumFractionDigits:2})+' ден.';
+const xSorted=()=>[...db.expenses].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.id||0)-(b.id||0));
+
+function renderPayerChips(){
+  const seen=new Set(),names=[];
+  for(const e of xSorted().reverse()){
+    const p=(e.payer||'').trim();
+    if(p&&!seen.has(p.toLowerCase())){seen.add(p.toLowerCase());names.push(p)}
+    if(names.length>=8)break;
+  }
+  const cur=$('xPayer').value.trim().toLowerCase();
+  $('xPayerChips').innerHTML=names.map(p=>`<button type="button" class="chip${p.toLowerCase()===cur?' on':''}" data-payer="${esc(p)}">${ic('user','sm')}<span>${esc(p)}</span></button>`).join('');
+}
+
+function renderExpenses(){
+  renderPayerChips();
+  const from=dateKey(periodStart(xPeriod)),list=xSorted().filter(e=>e.date>=from).reverse();
+  $('xTotal').textContent=money(list.reduce((n,e)=>n+e.amount,0));
+  $('xCount').textContent=list.length;
+  const by={};list.forEach(e=>{by[e.payer]=(by[e.payer]||0)+e.amount});
+  const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]),max=rows.length?rows[0][1]:1;
+  const none=`<div class="empty">${ic('receipt')}Нема сметки во овој период.</div>`;
+  $('xByPerson').innerHTML=rows.length?rows.map(([p,v])=>`<div class="place-row"><span class="nm">${ic('user','sm')}<span>${esc(p)}</span></span><b class="tnum">${money(v)}</b><span class="track"><span style="width:${Math.max(3,v/max*100)}%"></span></span></div>`).join(''):none;
+  const byC={};list.forEach(e=>{const c=catOf(e);byC[c]=(byC[c]||0)+e.amount});
+  const cRows=Object.entries(byC).sort((a,b)=>b[1]-a[1]),cMax=cRows.length?cRows[0][1]:1;
+  $('xByCat').innerHTML=cRows.length?cRows.map(([c,v])=>`<div class="place-row"><span class="nm">${ic('receipt','sm')}<span>${esc(c)}</span></span><b class="tnum">${money(v)}</b><span class="track"><span style="width:${Math.max(3,v/cMax*100)}%"></span></span></div>`).join(''):none;
+  const known=new Set(FIXED.map(c=>c.toLowerCase()));
+  $('xCatList').innerHTML=[...new Set(db.expenses.map(catOf).filter(c=>!known.has(c.toLowerCase())))].map(c=>`<option value="${esc(c)}">`).join('');
+  const days={};list.forEach(e=>{(days[e.date]=days[e.date]||[]).push(e)});
+  $('xList').innerHTML=Object.keys(days).sort().reverse().map(k=>{
+    const[y,m,d]=k.split('-'),items=days[k];
+    return`<div class="xday"><div class="xday-h"><b>${d}.${m}.${y} · ${dayName(new Date(+y,+m-1,+d))}</b><span class="tnum">${money(items.reduce((n,e)=>n+e.amount,0))}</span></div>`
+      +items.map(e=>`<div class="xrow" data-id="${e.id}"><span class="xp">${ic('user','sm')}${esc(e.payer)}</span><span class="xn"><b>${esc(catOf(e))}</b>${e.note?' · '+esc(e.note):''}</span><b class="tnum">${money(e.amount)}</b><button class="icon-btn del" data-xdel title="Избриши" aria-label="Избриши">${ic('trash')}</button></div>`).join('')+`</div>`;
+  }).join('')||none;
+}
+
+$('xDate').value=dateKey(new Date());
+$('xPayer').addEventListener('input',renderPayerChips);
+$('xPayerChips').addEventListener('click',ev=>{
+  const c=ev.target.closest('.chip');if(!c)return;
+  $('xPayer').value=c.dataset.payer;renderPayerChips();
+});
+$('xAdd').addEventListener('click',()=>{
+  const date=$('xDate').value,payer=$('xPayer').value.trim(),note=$('xNote').value.trim();
+  const amount=Math.round(parseFloat($('xAmount').value.replace(',','.'))*100)/100;
+  if(!date)return toast('Внеси датум.','warn');
+  if(!payer){$('xPayer').focus();return toast('Внеси кој плати.','warn')}
+  if(!(amount>0)){$('xAmount').focus();return toast('Внеси износ поголем од 0.','warn')}
+  const raw=xCat==='other'?$('xCatName').value.trim():xCat;
+  const cat=[...FIXED,...db.expenses.map(catOf)].find(c=>c.toLowerCase()===raw.toLowerCase())||raw; // "хотел" reuses an existing "Хотел"
+  if(!cat){$('xCatName').focus();return toast('Напиши категорија.','warn')}
+  db.expenses.push({id:Date.now()+Math.random(),date,payer,amount,cat,note});
+  saveData();$('xAmount').value='';$('xNote').value='';render();toast('Сметката е додадена.');
+});
+$('xList').addEventListener('click',ev=>{
+  const row=ev.target.closest('.xrow');if(!row||!ev.target.closest('[data-xdel]'))return;
+  if(!confirm('Сигурно сакаш да ја избришеш оваа сметка?'))return;
+  db.expenses=db.expenses.filter(e=>String(e.id)!==row.dataset.id);saveData();render();toast('Сметката е избришана.');
+});
+document.querySelectorAll('[data-xcat]').forEach(b=>b.addEventListener('click',()=>{
+  xCat=b.dataset.xcat;
+  document.querySelectorAll('[data-xcat]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  $('xOtherWrap').hidden=xCat!=='other';
+  if(xCat==='other')$('xCatName').focus();
+}));
+document.querySelectorAll('[data-xperiod]').forEach(b=>b.addEventListener('click',()=>{
+  xPeriod=b.dataset.xperiod;
+  document.querySelectorAll('[data-xperiod]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  renderExpenses();
+}));
+
+try{$('xlsTitle').value=localStorage.getItem(XLS_TITLE_KEY)||''}catch(e){}
+$('xlsTitle').addEventListener('input',()=>{try{localStorage.setItem(XLS_TITLE_KEY,$('xlsTitle').value)}catch(e){}});
 
 /* ---------- Init ---------- */
 render();updateClock();
@@ -980,7 +1315,7 @@ setInterval(render,30000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});
 </script>
 <script type="module">
-/* ---------- Firebase sync: one Firestore doc per event at users/{uid}/events/{id} ---------- */
+/* ---------- Firebase sync: one Firestore doc per event / expense ---------- */
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
@@ -996,43 +1331,46 @@ const app=initializeApp({
 const auth=getAuth(app);
 const fs=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
 const btn=$('authBtn');
-let col=null,unsub=null,remote=new Map(),first=true;
+const NAMES=['events','expenses']; // Firestore: users/{uid}/events and users/{uid}/expenses
+let cols={},unsubs=[],remote={},first={};
 const fail=()=>toast('Синхронизацијата не успеа.','err');
 
-// Diff db.events against what Firestore already has; write only what changed.
+// Diff each local list against what Firestore already has; write only what changed.
 syncHook=()=>{
-  if(!col)return;
-  const ids=new Set();
-  for(const e of db.events){
-    const id=String(e.id),j=JSON.stringify(e);ids.add(id);
-    if(remote.get(id)!==j){remote.set(id,j);setDoc(doc(col,id),JSON.parse(j)).catch(fail)}
+  for(const n of NAMES){
+    if(!cols[n])continue;
+    const rem=remote[n],ids=new Set();
+    for(const e of db[n]){
+      const id=String(e.id),j=JSON.stringify(e);ids.add(id);
+      if(rem.get(id)!==j){rem.set(id,j);setDoc(doc(cols[n],id),JSON.parse(j)).catch(fail)}
+    }
+    for(const id of [...rem.keys()])if(!ids.has(id)){rem.delete(id);deleteDoc(doc(cols[n],id)).catch(fail)}
   }
-  for(const id of [...remote.keys()])if(!ids.has(id)){remote.delete(id);deleteDoc(doc(col,id)).catch(fail)}
 };
 
-function listen(){
-  unsub=onSnapshot(col,snap=>{
+function listen(n){
+  return onSnapshot(cols[n],snap=>{
     const incoming=snap.docs.map(d=>d.data());
-    remote=new Map(incoming.map(e=>[String(e.id),JSON.stringify(e)]));
-    if(first){ // first load: keep events that exist only on this device, they get uploaded below
-      first=false;
-      const have=new Set(remote.keys());
-      db.events=[...incoming,...db.events.filter(e=>!have.has(String(e.id)))];
+    remote[n]=new Map(incoming.map(e=>[String(e.id),JSON.stringify(e)]));
+    if(first[n]){ // first load: keep items that exist only on this device, they get uploaded below
+      first[n]=false;
+      const have=new Set(remote[n].keys());
+      db[n]=[...incoming,...db[n].filter(e=>!have.has(String(e.id)))];
       syncHook();
-    }else db.events=incoming;
+    }else db[n]=incoming;
     try{localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}catch(e){}
     render();
   },fail);
 }
 
 onAuthStateChanged(auth,u=>{
-  if(unsub)unsub();
-  unsub=null;col=null;remote=new Map();first=true;
+  unsubs.forEach(f=>f());
+  unsubs=[];cols={};remote={};first={};
   btn.style.display='';
   if(!u){btn.textContent='Најави се со Google';return}
   btn.textContent='Одјави ('+u.email+')';
-  col=collection(fs,'users',u.uid,'events');
-  listen();
+  for(const n of NAMES){cols[n]=collection(fs,'users',u.uid,n);remote[n]=new Map();first[n]=true}
+  unsubs=NAMES.map(listen);
 });
 btn.addEventListener('click',()=>{
   if(auth.currentUser)signOut(auth);
