@@ -1029,8 +1029,13 @@ function monthSheet(y,m,list,prefix){
     const rest=items.filter(e=>!isC(e,'Храна')&&!isC(e,'Нафта')).reduce((n,e)=>n+e.amount,0);
     const names=[...new Map(items.map(e=>[catOf(e).toLowerCase(),catOf(e)])).values()]
       .sort((a,b)=>{const ia=FIXED.findIndex(x=>x.toLowerCase()===a.toLowerCase()),ib=FIXED.findIndex(x=>x.toLowerCase()===b.toLowerCase());return(ia<0?9:ia)-(ib<0?9:ib)});
-    const notes=items.map(e=>e.note).filter(Boolean).join('; ');
-    const desc=names.join('/')+(notes?(names.length?' (':'(')+notes+')':'');
+    const label=n=>{ // food bills show their note instead of "Храна" (e.g. "Вода"); other categories show "Име (белешка)"
+      const its=items.filter(e=>catOf(e).toLowerCase()===n.toLowerCase());
+      if(n.toLowerCase()==='храна')return[...new Set(its.map(e=>e.note||'Храна'))].join('/');
+      const notes=[...new Set(its.map(e=>e.note).filter(Boolean))];
+      return n+(notes.length?' ('+notes.join('; ')+')':'');
+    };
+    const desc=names.map(label).join('/');
     rows.push(`<row r="${r}">${[c(0,r,11+o,sn),c(1,r,12+o,sn),c(2,r,14+o,desc),c(3,r,13+o,fuel||''),...Array.from({length:k},(_,j)=>c(4+j,r,13+o,food[j]??'')),c(last,r,13+o,rest||'')].join('')}</row>`);
   }
   const end=2+days,tr=end+2;
