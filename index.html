@@ -69,7 +69,13 @@ button,input,select{font:inherit;color:inherit}
 label.lbl{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
 .input-ic{position:relative}
 .input-ic .i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
-input[type=text],input[type=date],input[type=datetime-local],select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface);min-height:44px}
+input[type=date],input[type=month]{cursor:pointer;font-weight:600;letter-spacing:.2px;background:var(--surface-2);transition:border-color .15s,box-shadow .15s}
+input[type=date]:hover,input[type=month]:hover{border-color:var(--muted)}
+input[type=date]:focus,input[type=month]:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(94,107,128,.25)}
+input[type=date]::-webkit-calendar-picker-indicator,input[type=month]::-webkit-calendar-picker-indicator{cursor:pointer;padding:6px;border-radius:8px;opacity:.7}
+input[type=date]::-webkit-calendar-picker-indicator:hover,input[type=month]::-webkit-calendar-picker-indicator:hover{opacity:1;background:var(--line)}
+@media (prefers-color-scheme:dark){input[type=date]::-webkit-calendar-picker-indicator,input[type=month]::-webkit-calendar-picker-indicator{filter:invert(1)}}
+input[type=text],input[type=date],input[type=month],input[type=datetime-local],select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface);min-height:44px}
 .input-ic input{padding-left:40px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 0}
 .chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 11px 5px 8px;font-size:13px;cursor:pointer;max-width:100%}
@@ -514,6 +520,8 @@ tr:last-child td{border-bottom:0}
             <button data-xperiod="month" aria-pressed="true">Месец</button>
           </div>
         </div>
+        <label class="lbl" for="xPick">Датум</label>
+        <input id="xPick" type="date" style="margin-bottom:12px">
         <div class="stats">
           <div class="stat c-work"><span class="ic"><svg class="i"><use href="#i-receipt"/></svg></span><div><small>Вкупно</small><strong class="tnum" id="xTotal">0 ден.</strong></div></div>
           <div class="stat c-shift"><span class="ic"><svg class="i"><use href="#i-list"/></svg></span><div><small>Сметки</small><strong class="tnum" id="xCount">0</strong></div></div>
@@ -542,7 +550,8 @@ tr:last-child td{border-bottom:0}
           <button class="btn primary" id="xlsLastWeek"><svg class="i"><use href="#i-download"/></svg>Минатата недела</button>
           <button class="btn" id="xlsWeek"><svg class="i"><use href="#i-download"/></svg>Оваа недела</button>
           <button class="btn" id="xlsDay"><svg class="i"><use href="#i-download"/></svg>Избраниот ден</button>
-          <button class="btn" id="xlsMonth"><svg class="i"><use href="#i-download"/></svg>Овој месец</button>
+          <input id="xlsMonthSel" type="month" aria-label="Избери месец" style="width:auto">
+          <button class="btn" id="xlsMonth"><svg class="i"><use href="#i-download"/></svg>Избраниот месец</button>
           <button class="btn" id="xlsAll"><svg class="i"><use href="#i-download"/></svg>Сите денови</button>
         </div>
       </section>
@@ -1159,9 +1168,12 @@ function weekExport(offset){
 }
 $('xlsLastWeek').addEventListener('click',()=>weekExport(-1));
 $('xlsWeek').addEventListener('click',()=>weekExport(0));
+$('xlsMonthSel').value=dateKey(new Date()).slice(0,7);
 $('xlsMonth').addEventListener('click',()=>{
-  const from=periodStart('month'),n=new Date();
-  downloadArchive(d=>d>=from,`Rabotno_vreme_${n.getFullYear()}-${pad(n.getMonth()+1)}.xlsx`,'овој месец');
+  const v=$('xlsMonthSel').value;
+  if(!v)return toast('Избери месец.','warn');
+  const[y,m]=v.split('-').map(Number),from=new Date(y,m-1,1),to=new Date(y,m,1);
+  downloadArchive(d=>d>=from&&d<to,`Rabotno_vreme_${v}.xlsx`,'избраниот месец');
 });
 $('xlsAll').addEventListener('click',()=>{
   if(!db.events.length&&!db.expenses.length)return toast('Сè уште нема податоци за архивирање.','warn');
@@ -1249,7 +1261,16 @@ function renderPayerChips(){
 
 function renderExpenses(){
   renderPayerChips();
-  const from=dateKey(periodStart(xPeriod)),list=xSorted().filter(e=>e.date>=from).reverse();
+  // period (day / Mon–Sun week / month) is taken around the date in the Збир picker
+  const k=$('xPick').value||dateKey(new Date()),[py,pm,pd]=k.split('-').map(Number);
+  let inRange=e=>e.date.slice(0,7)===k.slice(0,7);
+  if(xPeriod==='today')inRange=e=>e.date===k;
+  else if(xPeriod==='week'){
+    const s=new Date(py,pm-1,pd);s.setDate(s.getDate()-(s.getDay()+6)%7);
+    const e7=new Date(s);e7.setDate(e7.getDate()+7);
+    inRange=e=>e.date>=dateKey(s)&&e.date<dateKey(e7);
+  }
+  const list=xSorted().filter(inRange).reverse();
   $('xTotal').textContent=money(list.reduce((n,e)=>n+e.amount,0));
   $('xCount').textContent=list.length;
   const by={};list.forEach(e=>{by[e.payer]=(by[e.payer]||0)+e.amount});
@@ -1270,6 +1291,11 @@ function renderExpenses(){
 }
 
 $('xDate').value=dateKey(new Date());
+$('xPick').value=$('xDate').value;
+$('xDate').addEventListener('change',()=>{$('xPick').value=$('xDate').value;renderExpenses()});
+$('xPick').addEventListener('change',renderExpenses);
+// clicking anywhere on the field opens the calendar, not just the tiny icon
+document.querySelectorAll('input[type=date],input[type=month]').forEach(i=>i.addEventListener('click',()=>{try{i.showPicker()}catch(e){}}));
 $('xPayer').addEventListener('input',renderPayerChips);
 $('xPayerChips').addEventListener('click',ev=>{
   const c=ev.target.closest('.chip');if(!c)return;
