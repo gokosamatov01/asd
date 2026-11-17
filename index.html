@@ -218,6 +218,16 @@ tr:last-child td{border-bottom:0}
 .wd .l{font-size:12px;color:var(--muted)}
 .wd.today .l{color:var(--ink);font-weight:700}
 .wd.today .b{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--work)}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.cal .h{font-size:12px;color:var(--muted);text-align:center;padding-bottom:2px}
+.cd{display:flex;flex-direction:column;justify-content:space-between;gap:4px;min-height:62px;padding:6px;border:0;border-radius:10px;background:var(--surface-2);color:var(--ink);font:inherit;text-align:left;cursor:pointer;min-width:0}
+.cd:disabled{cursor:default;color:var(--muted);opacity:.6}
+.cd .n{font-size:12px;font-weight:600}
+.cd .v{font-size:11px;color:var(--muted)}
+.cd .t{height:5px;border-radius:99px;background:var(--line);overflow:hidden}
+.cd .t span{display:block;height:100%;background:var(--work);border-radius:99px}
+.cd.today{box-shadow:0 0 0 2px var(--work)}
+.cd.blank{background:transparent;cursor:default}
 
 .day-total span{background:var(--surface-2);padding:5px 11px;border-radius:999px}
 .day-pick select{min-width:200px}
@@ -225,10 +235,10 @@ tr:last-child td{border-bottom:0}
 
 @media (max-width:860px){.cols,.cols.even{grid-template-columns:1fr}}
 @media (max-width:640px){
-  .nav{position:fixed;left:0;right:0;bottom:0;top:auto;margin:0;border-radius:18px 18px 0 0;border-width:1px 0 0;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+  .nav{position:fixed;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));top:auto;margin:0;border-radius:18px;padding:6px 8px} /* floating bar: clear of browser toolbar, rounded corners and gesture area */
   .nav button{flex-direction:column;gap:2px;font-size:11.5px;padding:7px 4px}
-  main{padding-bottom:96px}
-  .toast-wrap{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  main{padding-bottom:104px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+  .toast-wrap{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
   .hero-body,.state{padding:16px}
   .shift-grid{grid-template-columns:1fr;justify-items:center}
   .shift-grid .stats{width:100%}
@@ -327,7 +337,8 @@ tr:last-child td{border-bottom:0}
           <label class="lbl" for="place">Град / објект</label>
           <div class="input-ic">
             <svg class="i"><use href="#i-pin"/></svg>
-            <input id="place" type="text" placeholder="Пример: Штип – Маркет 1" autocomplete="off">
+            <input id="place" type="text" list="placeList" placeholder="Пример: Штип – Маркет 1" autocomplete="off">
+            <datalist id="placeList"></datalist>
           </div>
           <div class="chips" id="recentPlaces"></div>
 
@@ -424,6 +435,19 @@ tr:last-child td{border-bottom:0}
 
     <section class="card">
       <div class="card-head">
+        <h2><svg class="i"><use href="#i-calendar"/></svg>Календар</h2>
+        <div class="day-pick">
+          <button class="icon-btn" id="calPrev" aria-label="Претходен месец"><svg class="i sm"><use href="#i-left"/></svg></button>
+          <b id="calTitle" style="min-width:110px;text-align:center"></b>
+          <button class="icon-btn" id="calNext" aria-label="Следен месец"><svg class="i sm"><use href="#i-right"/></svg></button>
+        </div>
+      </div>
+      <div class="cal" id="calGrid"></div>
+      <p class="muted" style="margin:12px 0 0">Работа во месецот: <b class="tnum" id="calTotal">0:00</b> · кликни на ден за детали</p>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
         <h2><svg class="i"><use href="#i-pin"/></svg>Работа по објект</h2>
         <span class="muted" style="margin:0">за избраниот период</span>
       </div>
@@ -470,7 +494,7 @@ tr:last-child td{border-bottom:0}
         <div class="add-row editor">
           <div><label class="lbl" for="newAt">Датум и време</label><input id="newAt" type="datetime-local"></div>
           <div><label class="lbl" for="newType">Тип на настан</label><select id="newType"></select></div>
-          <div><label class="lbl" for="newPlace">Град / објект</label><input id="newPlace" type="text" placeholder="Ако е потребно"></div>
+          <div><label class="lbl" for="newPlace">Град / објект</label><input id="newPlace" type="text" list="placeList" placeholder="Ако е потребно"></div>
           <button class="btn primary" id="addEventBtn"><svg class="i"><use href="#i-plus"/></svg>Додај настан</button>
         </div>
         <p class="muted">Заборавил да притисне копче? Додај го настанот рачно со точното време.</p>
@@ -543,7 +567,7 @@ tr:last-child td{border-bottom:0}
     <div class="cols even">
       <section class="card">
         <div class="card-head"><h2><svg class="i"><use href="#i-sheet"/></svg>Извештај за Excel</h2></div>
-        <p class="muted">Excel датотека со четири листови: збир по ден, по ден и локација, по локација и детали за секој дел. Неделите се од понеделник до недела. Сметките се во посебен лист за секој месец (еден ред за секој ден: нафта, секоја сметка за храна во своја ќелија, останато и збир по лице), плус лист „Сметки“ со секоја сметка поединечно (ден, лице, храна, нафта, паркинг, друго, вкупно).</p>
+        <p class="muted">Excel датотека со четири листови: збир по ден, по ден и локација, по локација и детали за секој дел. Неделите се од понеделник до недела. Сметките се во посебен лист за секој месец (еден ред за секој ден: нафта, секоја сметка за храна во своја ќелија, останато и збир на дното), плус лист „Сметки“ со секоја сметка поединечно (ден, лице, храна, нафта, паркинг, друго, забелешка; нафтата е со „//“).</p>
         <label class="lbl" for="xlsTitle">Наслов на листовите со трошоци (по желба)</label>
         <input id="xlsTitle" type="text" placeholder="Пример: Peugeot" autocomplete="off" style="margin-bottom:12px">
         <div class="btn-row">
@@ -609,12 +633,18 @@ function loadData(){
     if(!raw)return{events:[],session:null};
     const p=JSON.parse(raw);
     if(Array.isArray(p))return{events:p,session:null};
-    if(p&&Array.isArray(p.events))return{events:p.events,session:p.session||null,expenses:Array.isArray(p.expenses)?p.expenses:[]};
+    if(p&&Array.isArray(p.events))return{events:p.events,session:p.session||null,expenses:Array.isArray(p.expenses)?p.expenses:[],gone:Array.isArray(p.gone)?p.gone:[]};
     return{events:[],session:null};
   }catch(e){loadFailed=true;return{events:[],session:null}}
 }
+// Firestore doc id = String(e.id): a record without id would collapse into one "undefined" doc.
+const ensureIds=a=>{for(const e of a)if(e.id==null||e.id==='')e.id=Date.now()+Math.random();return a};
 let db=loadData();
-db.expenses=db.expenses||[];
+db.expenses=ensureIds(db.expenses||[]);
+ensureIds(db.events);
+db.gone=db.gone||[]; // ids deleted while signed out; stops the cloud copy from coming back on sign-in
+let signedIn=false; // true once the cloud's first snapshot is merged; deletes before that go to db.gone
+const markGone=id=>{if(!signedIn)db.gone.push(String(id))};
 function saveData(){
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
   catch(e){toast('Податоците не можат да се зачуваат во овој прелистувач.','err')}
@@ -661,7 +691,7 @@ const actions={
     const s=currentSessionState();
     if(!s.shift||!s.work)return toast('Нема започната активна работа.','warn');
     const last=lastOf('WORK_START'),t=Date.now();
-    if(s.pause){const ps=lastOf('PAUSE_START');addEvent('PAUSE_END',ps?ps.place:'',new Date(t).toISOString())}
+    if(s.pause){addEvent('PAUSE_END','',new Date(t).toISOString())}
     addEvent('WORK_END',last?last.place:'',new Date(t+1).toISOString());
     $('place').value='';
     toast('Делот на '+(last&&last.place?last.place:'објектот')+' е завршен: '+duration(lastPart&&lastPart().dur||0)+' нето.');
@@ -670,15 +700,14 @@ const actions={
     const s=currentSessionState();
     if(!s.shift)return toast('Прво започни смена.','warn');
     if(s.pause)return toast('Паузата веќе е започната.','warn');
-    const lw=lastOf('WORK_START');
-    const e=addEvent('PAUSE_START',lw?lw.place:$('place').value.trim());
+    const e=addEvent('PAUSE_START');
     e.resumeWork=s.work;saveData();toast(s.work?'Пауза. Работата продолжува, паузата ќе се одземе.':'Пауза. Пријатно!');
   },
   endPause(){
     const s=currentSessionState();
     if(!s.shift||!s.pause)return toast('Нема активна пауза.','warn');
     const start=lastOf('PAUSE_START');
-    const e=addEvent('PAUSE_END',start?start.place:'');
+    const e=addEvent('PAUSE_END');
     e.resumeWork=s.work;saveData();toast(s.work?'Паузата заврши. Работата продолжува.':'Паузата заврши.');
   },
   endShift(){
@@ -702,7 +731,7 @@ function currentPartNet(){
 function overlap(i,pauses){return pauses.reduce((n,p)=>n+Math.max(0,Math.min(i.end,p.end)-Math.max(i.start,p.start)),0)}
 function calculate(){
   const events=sortedEvents(),intervals=[],shifts=[];
-  let shift=null,workStart=null,workPlace='',pauseStart=null,pausePlace='';
+  let shift=null,workStart=null,workPlace='',pauseStart=null;
   const add=(type,start,end,place)=>{if(start&&end&&end>=start)intervals.push({type,start,end,place:place||''})};
   for(const e of events){
     const t=eventDate(e);
@@ -713,18 +742,18 @@ function calculate(){
     if(!shift)continue;
     if(e.type==='WORK_START'){if(workStart)add(WORK,workStart,t,workPlace);workStart=t;workPlace=e.place||''}
     else if(e.type==='WORK_END'){if(workStart)add(WORK,workStart,t,workPlace);workStart=null}
-    else if(e.type==='PAUSE_START'){if(!pauseStart){pauseStart=t;pausePlace=e.place||workPlace||''}}
-    else if(e.type==='PAUSE_END'){if(pauseStart)add(PAUSE,pauseStart,t,pausePlace);pauseStart=null}
+    else if(e.type==='PAUSE_START'){if(!pauseStart){pauseStart=t}}
+    else if(e.type==='PAUSE_END'){if(pauseStart)add(PAUSE,pauseStart,t);pauseStart=null}
     else if(e.type==='SHIFT_END'){
       if(workStart){add(WORK,workStart,t,workPlace);workStart=null}
-      if(pauseStart){add(PAUSE,pauseStart,t,pausePlace);pauseStart=null}
+      if(pauseStart){add(PAUSE,pauseStart,t);pauseStart=null}
       shift.end=t;
     }
   }
   const now=new Date();
   if(shift&&!shift.end){
     if(workStart)add(WORK,workStart,now,workPlace);
-    if(pauseStart)add(PAUSE,pauseStart,now,pausePlace);
+    if(pauseStart)add(PAUSE,pauseStart,now);
   }
   const pausesAll=intervals.filter(i=>i.type===PAUSE);
   const worksAll=intervals.filter(i=>i.type===WORK);
@@ -809,7 +838,7 @@ function render(){
   document.querySelectorAll('.tile').forEach(t=>t.classList.toggle('next',t.id===next));
 
   calc=calculate();
-  renderShift();renderRecent();renderPeriod();renderWeek();renderExpenses();updateDaySelect();renderDay();renderBackupInfo();updateHero();
+  renderShift();renderRecent();renderPeriod();renderWeek();renderCal();renderExpenses();updateDaySelect();renderDay();renderBackupInfo();updateHero();
 }
 
 function renderShift(){
@@ -842,6 +871,11 @@ function renderRecent(){
     if(p&&!seen.has(p.toLowerCase())){seen.add(p.toLowerCase());list.push(p)}
     if(list.length>=6)break;
   }
+  const all=new Map(); // every place ever used (events are synced, so the list persists), for autocomplete
+  for(const e of db.events){const p=(e.place||'').trim();if(p&&!all.has(p.toLowerCase()))all.set(p.toLowerCase(),p)}
+  const opts=[...all.values()].sort((a,b)=>a.localeCompare(b)).map(p=>`<option value="${esc(p)}">`).join('');
+  // rewriting an unchanged datalist on every keystroke closes the open dropdown
+  if($('placeList').dataset.h!==opts){$('placeList').innerHTML=opts;$('placeList').dataset.h=opts}
   const cur=$('place').value.trim().toLowerCase();
   $('recentPlaces').innerHTML=list.map(p=>`<button type="button" class="chip${p.toLowerCase()===cur?' on':''}" data-place="${esc(p)}">${ic('pin','sm')}<span>${esc(p)}</span></button>`).join('');
 }
@@ -892,8 +926,9 @@ function updateDaySelect(){
   if(!days.includes(daySel))daySel=days[0];
   el.value=daySel;
 }
-$('daySelect').addEventListener('change',e=>{daySel=e.target.value;renderDay()});
+$('daySelect').addEventListener('change',e=>{daySel=e.target.value;editorDirty=false;renderDay()});
 
+let editorDirty=false; // unsaved typing in the editor: sync/30s re-renders must not wipe it
 function renderDay(){
   const ints=calc.intervals.filter(i=>dateKey(i.start)===daySel).sort((a,b)=>a.start-b.start);
   $('emptyIntervals').style.display=ints.length?'none':'flex';
@@ -907,39 +942,41 @@ function renderDay(){
 
   const events=sortedEvents().filter(e=>daySel&&dateKey(eventDate(e))===daySel);
   $('emptyEditor').style.display=events.length?'none':'flex';
-  $('eventEditorRows').innerHTML=events.map(e=>{
+  if(!editorDirty)$('eventEditorRows').innerHTML=events.map(e=>{
     const opts=TYPE_KEYS.map(k=>`<option value="${k}"${e.type===k?' selected':''}>${esc(TYPES[k])}</option>`).join('');
-    return`<tr data-id="${e.id}"><td><input type="datetime-local" class="f-dt" value="${localInputValue(eventDate(e))}"></td><td><select class="f-type">${opts}</select></td><td><input type="text" class="f-place" value="${esc(e.place||'')}" placeholder="Град / објект"></td><td><button class="icon-btn ok" data-save title="Зачувај" aria-label="Зачувај">${ic('save')}</button> <button class="icon-btn del" data-del title="Избриши" aria-label="Избриши">${ic('trash')}</button></td></tr>`;
+    return`<tr data-id="${e.id}"><td><input type="datetime-local" class="f-dt" value="${localInputValue(eventDate(e))}"></td><td><select class="f-type">${opts}</select></td><td><input type="text" class="f-place" list="placeList" value="${esc(e.place||'')}" placeholder="Град / објект"></td><td><button class="icon-btn ok" data-save title="Зачувај" aria-label="Зачувај">${ic('save')}</button> <button class="icon-btn del" data-del title="Избриши" aria-label="Избриши">${ic('trash')}</button></td></tr>`;
   }).join('');
   const base=daySel?new Date(daySel+'T'+timeText(new Date())):new Date();
   if(!$('newAt').value||$('newAt').dataset.day!==daySel){$('newAt').value=localInputValue(base);$('newAt').dataset.day=daySel}
 }
+$('eventEditorRows').addEventListener('input',()=>{editorDirty=true});
 $('eventEditorRows').addEventListener('click',ev=>{
   const tr=ev.target.closest('tr');if(!tr)return;
-  const id=tr.dataset.id,e=db.events.find(x=>String(x.id)===id);if(!e)return;
+  const id=tr.dataset.id,e=db.events.find(x=>String(x.id)===id);
+  if(!e){editorDirty=false;render();return toast('Настанот е избришан на друг уред.','warn')}
   if(ev.target.closest('[data-save]')){
     const dt=tr.querySelector('.f-dt').value;
     if(!dt)return toast('Внеси датум и време.','warn');
-    e.at=new Date(dt).toISOString();e.type=tr.querySelector('.f-type').value;e.place=tr.querySelector('.f-place').value.trim();
+    e.upd=Date.now();editorDirty=false;e.at=new Date(dt).toISOString();e.type=tr.querySelector('.f-type').value;e.place=e.type.startsWith('PAUSE')?'':tr.querySelector('.f-place').value.trim();
     daySel=dateKey(new Date(dt));saveData();render();toast('Настанот е зачуван.');
   }else if(ev.target.closest('[data-del]')){
     if(!confirm('Сигурно сакаш да го избришеш овој настан?'))return;
-    db.events=db.events.filter(x=>String(x.id)!==id);saveData();render();toast('Настанот е избришан.');
+    editorDirty=false;db.events=db.events.filter(x=>String(x.id)!==id);markGone(id);saveData();render();toast('Настанот е избришан.');
   }
 });
 $('newType').innerHTML=TYPE_KEYS.map(k=>`<option value="${k}">${esc(TYPES[k])}</option>`).join('');
 $('addEventBtn').addEventListener('click',()=>{
   const dt=$('newAt').value;if(!dt)return toast('Внеси датум и време.','warn');
-  const type=$('newType').value,place=$('newPlace').value.trim();
+  editorDirty=false;
+  const type=$('newType').value,place=type.startsWith('PAUSE')?'':$('newPlace').value.trim(); // a pause is independent of the object
   if(type==='WORK_START'&&!place)return toast('За почеток на работа внеси град / објект.','warn');
   const e=addEvent(type,place,new Date(dt).toISOString());
   if(type==='PAUSE_START'){
-    const lw=sortedEvents().filter(x=>x.type==='WORK_START'&&eventDate(x)<=eventDate(e)).pop();
-    if(!e.place&&lw)e.place=lw.place;saveData();
+    saveData();
   }
   if(type==='PAUSE_END'){
     const ps=sortedEvents().filter(x=>x.type==='PAUSE_START'&&eventDate(x)<=eventDate(e)).pop();
-    e.resumeWork=!!(ps&&ps.resumeWork);if(!e.place&&ps)e.place=ps.place;saveData();
+    e.resumeWork=!!(ps&&ps.resumeWork);saveData();
   }
   daySel=dateKey(new Date(dt));$('newPlace').value='';$('newAt').dataset.day='';
   render();toast('Настанот е додаден.');
@@ -984,8 +1021,8 @@ function colName(i){let s='';i++;while(i){const m=(i-1)%26;s=String.fromCharCode
 /* styles: 0 normal, 1 header, 2 date, 3 time, 4 duration, 5 total, 6 total duration, 7 title, 8 muted note */
 const serial=d=>{d=new Date(d);return(d.getTime()-d.getTimezoneOffset()*60000)/864e5+25569};
 const mins=ms=>Math.floor(Math.max(0,ms)/60000)/1440;
-const XD=d=>({v:Math.floor(serial(d)),s:2}),XT=d=>({v:Math.floor(serial(d)%1*1440+1e-6)/1440,s:3}),XH=ms=>({v:mins(ms),s:4}),XHT=()=>({sum:1,s:6}),XM=n=>({v:n,s:9}),XMT=()=>({sum:1,s:10});
-function sheetXml({title,note,head,rows,total,widths}){
+const XD=d=>({v:Math.floor(serial(d)),s:2}),XT=d=>({v:Math.floor(serial(d)%1*1440+1e-6)/1440,s:3}),XH=ms=>({v:mins(ms),s:4}),XHT=()=>({sum:1,s:6}),XM=n=>({v:n,s:9}),XMT=()=>({sum:1,s:10}),XMC=n=>({v:n,s:25}),XDC=d=>({v:Math.floor(serial(d)),s:26});
+function sheetXml({title,note,head,rows,total,widths,def=0}){
   let r=1,hr=0;const out=[];
   const row=(cells,def)=>{const rr=r++;out.push(`<row r="${rr}">`+cells.map((c,i)=>{
     const ref=colName(i)+rr;
@@ -997,11 +1034,11 @@ function sheetXml({title,note,head,rows,total,widths}){
   }).join('')+'</row>')};
   row([{v:title,s:7}],0);row([{v:note,s:8}],0);r++;
   hr=r;row(head.map(h=>({v:h,s:1})),1);
-  rows.forEach(x=>row(x,0));
+  rows.forEach(x=>row(x,def));
   if(total)row(total,5);
   return`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="${hr}" topLeftCell="A${hr+1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${widths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${out.join('')}</sheetData></worksheet>`;
 }
-const STYLES=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="7"><numFmt numFmtId="164" formatCode="dd.mm.yyyy"/><numFmt numFmtId="165" formatCode="hh:mm"/><numFmt numFmtId="166" formatCode="[h]:mm"/><numFmt numFmtId="167" formatCode="#,##0.00"/><numFmt numFmtId="168" formatCode="d-mmm"/><numFmt numFmtId="169" formatCode="ddd"/><numFmt numFmtId="170" formatCode="#,##0&quot; ден&quot;"/></numFmts><fonts count="5"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="15"/><color rgb="FF14213D"/><name val="Calibri"/></font><font><i/><sz val="10"/><color rgb="FF5E6B80"/><name val="Calibri"/></font></fonts><fills count="6"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF14213D"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE2F3EB"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFDCE6F7"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE7E6E6"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="4"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FFDDE3EA"/></bottom><diagonal/></border><border><left/><right/><top style="thin"><color rgb="FF0E8A5F"/></top><bottom style="thin"><color rgb="FF0E8A5F"/></bottom><diagonal/></border><border><left style="thin"><color rgb="FF000000"/></left><right style="thin"><color rgb="FF000000"/></right><top style="thin"><color rgb="FF000000"/></top><bottom style="thin"><color rgb="FF000000"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="25"><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"><alignment horizontal="left"/></xf><xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="166" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="0" fontId="2" fillId="3" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="166" fontId="2" fillId="3" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="167" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="167" fontId="2" fillId="3" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="168" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="169" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="170" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="168" fontId="0" fillId="4" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="169" fontId="0" fillId="4" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="170" fontId="0" fillId="4" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="0" fillId="4" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="2" fillId="5" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center"/></xf><xf numFmtId="0" fontId="2" fillId="5" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="centerContinuous"/></xf><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="centerContinuous"/></xf><xf numFmtId="170" fontId="2" fillId="5" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="170" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+const STYLES=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="7"><numFmt numFmtId="164" formatCode="dd.mm.yyyy"/><numFmt numFmtId="165" formatCode="hh:mm"/><numFmt numFmtId="166" formatCode="[h]:mm"/><numFmt numFmtId="167" formatCode="#,##0.00"/><numFmt numFmtId="168" formatCode="d-mmm"/><numFmt numFmtId="169" formatCode="ddd"/><numFmt numFmtId="170" formatCode="#,##0&quot; ден&quot;"/></numFmts><fonts count="5"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="15"/><color rgb="FF14213D"/><name val="Calibri"/></font><font><i/><sz val="10"/><color rgb="FF5E6B80"/><name val="Calibri"/></font></fonts><fills count="6"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF14213D"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE2F3EB"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFDCE6F7"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE7E6E6"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="4"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FFDDE3EA"/></bottom><diagonal/></border><border><left/><right/><top style="thin"><color rgb="FF0E8A5F"/></top><bottom style="thin"><color rgb="FF0E8A5F"/></bottom><diagonal/></border><border><left style="thin"><color rgb="FF000000"/></left><right style="thin"><color rgb="FF000000"/></right><top style="thin"><color rgb="FF000000"/></top><bottom style="thin"><color rgb="FF000000"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="29"><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"><alignment horizontal="left"/></xf><xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="166" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="0" fontId="2" fillId="3" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="166" fontId="2" fillId="3" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="167" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/><xf numFmtId="167" fontId="2" fillId="3" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="168" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="169" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="170" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="168" fontId="0" fillId="4" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="169" fontId="0" fillId="4" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left"/></xf><xf numFmtId="170" fontId="0" fillId="4" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="0" fillId="4" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="2" fillId="5" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center"/></xf><xf numFmtId="0" fontId="2" fillId="5" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="centerContinuous"/></xf><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="centerContinuous"/></xf><xf numFmtId="170" fontId="2" fillId="5" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="170" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="167" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center"/></xf><xf numFmtId="164" fontId="0" fillId="0" borderId="3" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center"/></xf><xf numFmtId="170" fontId="2" fillId="5" borderId="3" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center"/></xf><xf numFmtId="0" fontId="3" fillId="0" borderId="3" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
 function buildXlsx(sheets){
   const files=[
     {name:'[Content_Types].xml',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`},
@@ -1029,7 +1066,7 @@ function monthSheet(y,m,list,prefix){
   const f=(i,r,s,fx)=>`<c r="${colName(i)+r}" s="${s}"><f>${fx}</f></c>`;
   const rows=[];
   const title=(prefix?prefix+'- ':'')+MONTHS[m].toUpperCase()+(prefix?'':' '+y);
-  rows.push(`<row r="1" ht="24" customHeight="1">${Array.from({length:last+1},(_,i)=>c(i,1,21,i?'':title)).join('')}</row>`);
+  rows.push(`<row r="1" ht="24" customHeight="1">${Array.from({length:last+1},(_,i)=>c(i,1,28,i?'':title)).join('')}</row>`);
   rows.push(`<row r="2">${Array.from({length:last+1},(_,i)=>c(i,2,i>=4&&i<last?20:19,i===3?'нафта':i===4?'Сметки':i===last?'Останато':'')).join('')}</row>`);
   for(let d=1;d<=days;d++){
     const r=2+d,dt=new Date(y,m,d),o=dt.getDay()%6===0?4:0,sn=Math.floor(serial(dt)),items=by[d]||[];
@@ -1048,11 +1085,9 @@ function monthSheet(y,m,list,prefix){
     rows.push(`<row r="${r}">${[c(0,r,11+o,sn),c(1,r,12+o,sn),c(2,r,14+o,desc),c(3,r,13+o,fuel||''),...Array.from({length:k},(_,j)=>c(4+j,r,13+o,food[j]??'')),c(last,r,13+o,rest||'')].join('')}</row>`);
   }
   const end=2+days,tr=end+2;
-  rows.push(`<row r="${tr}">${f(3,tr,22,`SUM(D3:D${end})`)}${f(4,tr,22,`SUM(E3:${L}${end})`)}${Array.from({length:k-1},(_,j)=>c(5+j,tr,22,'')).join('')}</row>`);
-  const pp={};list.filter(e=>!isC(e,'Нафта')).forEach(e=>{pp[e.payer]=(pp[e.payer]||0)+e.amount});
-  Object.entries(pp).sort((a,b)=>b[1]-a[1]).forEach(([p,v],i)=>{const r=tr+1+i;rows.push(`<row r="${r}">${c(3,r,23,p)}${c(4,r,24,Math.round(v*100)/100)}</row>`)});
+  rows.push(`<row r="${tr}">${f(3,tr,27,`SUM(D3:D${end})`)}${f(4,tr,27,`SUM(E3:${L}${end})`)}${Array.from({length:k},(_,j)=>c(5+j,tr,27,'')).join('')}</row>`);
   const widths=[9,7,36,13,...Array.from({length:k},()=>13),13];
-  return{name:MONTHS[m]+String(y).slice(2),xml:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"/></sheetViews><cols>${widths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${rows.join('')}</sheetData></worksheet>`};
+  return{name:MONTHS[m]+String(y).slice(2),xml:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"/></sheetViews><cols>${widths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${rows.join('')}</sheetData><mergeCells count="2"><mergeCell ref="A1:${L}1"/><mergeCell ref="E${tr}:${L}${tr}"/></mergeCells></worksheet>`}; // the total spans Сметки..Останато; the per-person table is added by hand
 }
 
 function downloadArchive(pred,name,label){
@@ -1145,13 +1180,14 @@ function downloadArchive(pred,name,label){
     Object.keys(byM).sort().forEach(k=>sheets.push(monthSheet(+k.slice(0,4),+k.slice(5,7)-1,byM[k],prefix)));
     // every bill on its own row, with its amount in the column of its category (anything but the three fixed ones goes to "Друго")
     const low=['храна','нафта','паркинг']; // same order as the column headers below
-    sheets.push({name:'Сметки',title:'Сметки – секоја поединечно',note:period,
-      head:['Ден','Лице','Храна','Нафта','Паркинг','Друго','Вкупно','Забелешка'],
+    // fuel is not tied to a person: its row always shows "//" in the first column
+    sheets.push({name:'Сметки',title:'Сметки – секоја поединечно',note:period,def:14,
+      head:['Ден','Лице','Храна','Нафта','Паркинг','Друго','Забелешка'],
       rows:exps.map(e=>{
-        const d=new Date(e.date+'T00:00:00'),i=low.indexOf(catOf(e).toLowerCase());
-        return[XD(d),e.payer,...low.map((_,j)=>j===i?XM(e.amount):''),i<0?XM(e.amount):'',XM(e.amount),[i<0?catOf(e):'',e.note].filter(Boolean).join(' – ')];
+        const i=low.indexOf(catOf(e).toLowerCase());
+        return[XDC(new Date(e.date+'T00:00:00')),i===1?'//':e.payer,...low.map((_,j)=>j===i?XMC(e.amount):''),i<0?XMC(e.amount):'',[i<0?catOf(e):'',e.note].filter(Boolean).join(' – ')];
       }),
-      total:['ВКУПНО','',XMT(),XMT(),XMT(),XMT(),XMT(),''],widths:[12,22,12,12,12,12,14,36]});
+      total:['','',XMT(),XMT(),XMT(),XMT(),''],widths:[12,14,12,12,12,12,36]});
   }
   downloadBlob(buildXlsx(sheets),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',name);
   toast('Excel извештајот е симнат.');
@@ -1201,7 +1237,7 @@ $('backupFile').addEventListener('change',async ev=>{
     const freshX=(Array.isArray(p.expenses)?p.expenses:[]).filter(e=>e&&e.date&&e.payer&&e.amount>0&&!haveX.has(String(e.id)));
     if(!fresh.length&&!freshX.length)return toast('Сите податоци од копијата веќе постојат.','warn');
     if(!confirm(`Ќе се додадат ${fresh.length} нови настани и ${freshX.length} сметки од копијата. Постоечките податоци остануваат. Продолжи?`))return;
-    db.events.push(...fresh);db.expenses.push(...freshX);saveData();render();toast(`Вратени ${fresh.length} настани и ${freshX.length} сметки.`);
+    db.events.push(...ensureIds(fresh));db.expenses.push(...ensureIds(freshX));saveData();render();toast(`Вратени ${fresh.length} настани и ${freshX.length} сметки.`);
   }catch(e){toast('Датотеката не е валидна копија од оваа апликација.','err')}
 });
 
@@ -1226,6 +1262,25 @@ function renderWeek(){
   $('weekChart').innerHTML=days.map(d=>`<div class="wd${d.k===today?' today':''}${d.ms?' on':''}"><span class="v tnum">${d.ms?duration(d.ms):''}</span><div class="tr"><div class="b" style="height:${Math.max(d.ms/max*100,2)}%"></div></div><span class="l">${d.n}</span></div>`).join('');
   $('weekTotal').textContent=duration(days.reduce((n,d)=>n+d.ms,0));
 }
+
+let calMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+function renderCal(){
+  const y=calMonth.getFullYear(),m=calMonth.getMonth(),today=dateKey(new Date()),by={},has=new Set(sortedEvents().map(e=>dateKey(eventDate(e))));
+  calc.intervals.filter(i=>i.type===WORK).forEach(i=>{const k=dateKey(i.start);by[k]=(by[k]||0)+i.dur});
+  const n=new Date(y,m+1,0).getDate(),days=Array.from({length:n},(_,i)=>{const k=dateKey(new Date(y,m,i+1));return{d:i+1,k,ms:by[k]||0}});
+  const max=Math.max(...days.map(d=>d.ms),8*36e5);
+  $('calTitle').textContent=MONTHS[m]+' '+y;
+  $('calTotal').textContent=duration(days.reduce((t,d)=>t+d.ms,0));
+  $('calGrid').innerHTML=['Пон','Вто','Сре','Чет','Пет','Саб','Нед'].map(x=>`<div class="h">${x}</div>`).join('')
+    +'<div class="cd blank"></div>'.repeat((new Date(y,m,1).getDay()+6)%7)
+    +days.map(d=>`<button class="cd${d.k===today?' today':''}" data-day="${d.k}"${has.has(d.k)?'':' disabled'}><span class="n">${d.d}</span><span class="v tnum">${d.ms?duration(d.ms):''}</span><span class="t"><span style="width:${d.ms/max*100}%"></span></span></button>`).join('');
+}
+$('calPrev').addEventListener('click',()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()-1,1);renderCal()});
+$('calNext').addEventListener('click',()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+1,1);renderCal()});
+$('calGrid').addEventListener('click',e=>{
+  const b=e.target.closest('[data-day]');if(!b||b.disabled)return;
+  daySel=b.dataset.day;editorDirty=false;showView('history');updateDaySelect();renderDay();
+});
 
 function stepDay(dir){ // options are newest first, so +1 = older day
   const el=$('daySelect'),i=el.selectedIndex+dir;
@@ -1305,18 +1360,18 @@ $('xAdd').addEventListener('click',()=>{
   const date=$('xDate').value,payer=$('xPayer').value.trim(),note=$('xNote').value.trim();
   const amount=Math.round(parseFloat($('xAmount').value.replace(',','.'))*100)/100;
   if(!date)return toast('Внеси датум.','warn');
-  if(!payer){$('xPayer').focus();return toast('Внеси кој плати.','warn')}
   if(!(amount>0)){$('xAmount').focus();return toast('Внеси износ поголем од 0.','warn')}
   const raw=xCat==='other'?$('xCatName').value.trim():xCat;
   const cat=[...FIXED,...db.expenses.map(catOf)].find(c=>c.toLowerCase()===raw.toLowerCase())||raw; // "хотел" reuses an existing "Хотел"
   if(!cat){$('xCatName').focus();return toast('Напиши категорија.','warn')}
-  db.expenses.push({id:Date.now()+Math.random(),date,payer,amount,cat,note});
+  if(!payer&&cat.toLowerCase()!=='нафта'){$('xPayer').focus();return toast('Внеси кој плати.','warn')}
+  db.expenses.push({id:Date.now()+Math.random(),date,payer:payer||'//',amount,cat,note}); // import requires a payer, fuel gets "//"
   saveData();$('xAmount').value='';$('xNote').value='';render();toast('Сметката е додадена.');
 });
 $('xList').addEventListener('click',ev=>{
   const row=ev.target.closest('.xrow');if(!row||!ev.target.closest('[data-xdel]'))return;
   if(!confirm('Сигурно сакаш да ја избришеш оваа сметка?'))return;
-  db.expenses=db.expenses.filter(e=>String(e.id)!==row.dataset.id);saveData();render();toast('Сметката е избришана.');
+  db.expenses=db.expenses.filter(e=>String(e.id)!==row.dataset.id);markGone(row.dataset.id);saveData();render();toast('Сметката е избришана.');
 });
 document.querySelectorAll('[data-xcat]').forEach(b=>b.addEventListener('click',()=>{
   xCat=b.dataset.xcat;
@@ -1337,10 +1392,6 @@ $('xlsTitle').addEventListener('input',()=>{try{localStorage.setItem(XLS_TITLE_K
 render();updateClock();
 if(loadFailed)toast('Не можам да ги прочитам зачуваните податоци.','err');
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
-try{
-  const last=+localStorage.getItem(BACKUP_KEY)||0;
-  if(db.events.length&&Date.now()-last>7*864e5)toast('Помина повеќе од 7 дена од последната резервна копија. Зачувај копија.','warn');
-}catch(e){}
 setInterval(updateClock,1000);
 setInterval(render,30000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});
@@ -1369,7 +1420,7 @@ const fail=()=>toast('Синхронизацијата не успеа.','err');
 // Diff each local list against what Firestore already has; write only what changed.
 syncHook=()=>{
   for(const n of NAMES){
-    if(!cols[n])continue;
+    if(!cols[n]||first[n])continue; // before the first snapshot `remote` is empty: writing now could overwrite newer cloud data
     const rem=remote[n],ids=new Set();
     for(const e of db[n]){
       const id=String(e.id),j=JSON.stringify(e);ids.add(id);
@@ -1381,13 +1432,18 @@ syncHook=()=>{
 
 function listen(n){
   return onSnapshot(cols[n],snap=>{
-    const incoming=snap.docs.map(d=>d.data());
+    const incoming=snap.docs.map(d=>d.data()).filter(e=>e.id!=null); // skips the legacy "undefined" doc
     remote[n]=new Map(incoming.map(e=>[String(e.id),JSON.stringify(e)]));
     if(first[n]){ // first load: keep items that exist only on this device, they get uploaded below
       first[n]=false;
-      const have=new Set(remote[n].keys());
-      db[n]=[...incoming,...db[n].filter(e=>!have.has(String(e.id)))];
+      const have=new Set(remote[n].keys()),gone=new Set(db.gone);
+      // items deleted while signed out are dropped here; syncHook then deletes them from the cloud
+      const mine=new Map(db[n].map(e=>[String(e.id),e]));
+      // same id on both sides: the copy edited last (upd) wins, so edits made offline / signed out survive
+      const merged=incoming.filter(e=>!gone.has(String(e.id))).map(e=>{const l=mine.get(String(e.id));return l&&(l.upd||0)>(e.upd||0)?l:e});
+      db[n]=[...merged,...db[n].filter(e=>!have.has(String(e.id)))];
       syncHook();
+      if(NAMES.every(k=>!first[k])){db.gone=[];signedIn=true}
     }else db[n]=incoming;
     try{localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}catch(e){}
     render();
@@ -1396,7 +1452,7 @@ function listen(n){
 
 onAuthStateChanged(auth,u=>{
   unsubs.forEach(f=>f());
-  unsubs=[];cols={};remote={};first={};
+  unsubs=[];cols={};remote={};first={};signedIn=false;
   btn.style.display='';
   if(!u){btn.textContent='Најави се со Google';return}
   btn.textContent='Одјави ('+u.email+')';
